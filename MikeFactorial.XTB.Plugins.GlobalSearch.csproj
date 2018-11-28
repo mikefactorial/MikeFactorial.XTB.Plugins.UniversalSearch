@@ -130,7 +130,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SimpleDataViewer.cs" />
+    <Compile Include="GlobalSearchTool.cs" />
     <Compile Include="GlobalSearch.cs">
       <SubType>UserControl</SubType>
     </Compile>

@@ -3,13 +3,13 @@ using System.ComponentModel.Composition;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 
-namespace D365SatSampleTool
+namespace MikeFactorial.XTB.Plugins
 {
     // Do not forget to update version number and author (company attribute) in AssemblyInfo.cs class
     // To generate Base64 string for Images below, you can use https://www.base64-image.de/
     [Export(typeof(IXrmToolBoxPlugin)),
         ExportMetadata("Name", "Global Search"),
-        ExportMetadata("Description", "This tool will allow you to search across all records in Dynamics 365 for a specific value"),
+        ExportMetadata("Description", "This tool will allow you to search across all records in Dynamics 365 for a specific value or wildcard values."),
         // Please specify the base64 content of a 32x32 pixels image
         ExportMetadata("SmallImageBase64", "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"),
         // Please specify the base64 content of a 80x80 pixels image
@@ -17,7 +17,7 @@ namespace D365SatSampleTool
         ExportMetadata("BackgroundColor", "#FFFFC0"),
         ExportMetadata("PrimaryFontColor", "#0000C0"),
         ExportMetadata("SecondaryFontColor", "#0000FF")]
-    public class MyPlugin : PluginBase
+    public class GlobalSearchTool : PluginBase
     {
         public override IXrmToolBoxPluginControl GetControl()
         {
