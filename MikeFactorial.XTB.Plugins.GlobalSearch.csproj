@@ -131,11 +131,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SimpleDataViewer.cs" />
-    <Compile Include="SDV.cs">
+    <Compile Include="GlobalSearch.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SDV.designer.cs">
-      <DependentUpon>SDV.cs</DependentUpon>
+    <Compile Include="GlobalSearch.designer.cs">
+      <DependentUpon>GlobalSearch.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -148,8 +148,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SDV.resx">
-      <DependentUpon>SDV.cs</DependentUpon>
+    <EmbeddedResource Include="GlobalSearch.resx">
+      <DependentUpon>GlobalSearch.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
