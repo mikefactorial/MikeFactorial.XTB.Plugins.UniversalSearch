@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GlobalSearch));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -36,6 +37,10 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.searchTextBox = new System.Windows.Forms.TextBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.searchTextToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.matchCaseCheckBox = new System.Windows.Forms.CheckBox();
             this.btnFind = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -44,6 +49,8 @@
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -60,17 +67,17 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.groupBox4);
             this.splitContainer1.Panel2.Controls.Add(this.groupBox3);
-            this.splitContainer1.Size = new System.Drawing.Size(831, 533);
-            this.splitContainer1.SplitterDistance = 225;
+            this.splitContainer1.Size = new System.Drawing.Size(1050, 537);
+            this.splitContainer1.SplitterDistance = 284;
             this.splitContainer1.TabIndex = 5;
             // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.EntitiesListViewControl1);
-            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(225, 523);
+            this.groupBox1.Size = new System.Drawing.Size(284, 537);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Entity";
@@ -90,16 +97,16 @@
             this.EntitiesListViewControl1.ParentBaseControl = this;
             this.EntitiesListViewControl1.RetrieveAsIfPublished = true;
             this.EntitiesListViewControl1.Service = null;
-            this.EntitiesListViewControl1.Size = new System.Drawing.Size(219, 504);
+            this.EntitiesListViewControl1.Size = new System.Drawing.Size(278, 518);
             this.EntitiesListViewControl1.TabIndex = 1;
             // 
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.tabControl1);
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox4.Location = new System.Drawing.Point(0, 57);
+            this.groupBox4.Location = new System.Drawing.Point(0, 82);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(602, 476);
+            this.groupBox4.Size = new System.Drawing.Size(762, 455);
             this.groupBox4.TabIndex = 3;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Records";
@@ -108,40 +115,76 @@
             // 
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(3, 16);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(1);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(596, 457);
+            this.tabControl1.Size = new System.Drawing.Size(756, 436);
             this.tabControl1.TabIndex = 0;
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.searchTextBox);
-            this.groupBox3.Controls.Add(this.btnFind);
+            this.groupBox3.Controls.Add(this.groupBox5);
+            this.groupBox3.Controls.Add(this.groupBox2);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox3.Location = new System.Drawing.Point(0, 0);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(602, 57);
+            this.groupBox3.Size = new System.Drawing.Size(762, 82);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Options";
+            this.groupBox3.Text = "Search Criteria";
             // 
             // searchTextBox
             // 
-            this.searchTextBox.Location = new System.Drawing.Point(4, 27);
-            this.searchTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.searchTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.searchTextBox.Location = new System.Drawing.Point(3, 16);
+            this.searchTextBox.Margin = new System.Windows.Forms.Padding(1);
             this.searchTextBox.Name = "searchTextBox";
-            this.searchTextBox.Size = new System.Drawing.Size(517, 20);
+            this.searchTextBox.Size = new System.Drawing.Size(734, 20);
             this.searchTextBox.TabIndex = 5;
+            this.searchTextToolTip.SetToolTip(this.searchTextBox, "Enter the value to search. Use wildcard (*) to perform a wildcard search.");
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.searchTextBox);
+            this.groupBox2.Location = new System.Drawing.Point(10, 14);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(740, 43);
+            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabStop = false;
+            // 
+            // searchTextToolTip
+            // 
+            this.searchTextToolTip.AutoPopDelay = 1000;
+            this.searchTextToolTip.InitialDelay = 500;
+            this.searchTextToolTip.ReshowDelay = 100;
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.matchCaseCheckBox);
+            this.groupBox5.Controls.Add(this.btnFind);
+            this.groupBox5.Location = new System.Drawing.Point(10, 50);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(740, 32);
+            this.groupBox5.TabIndex = 7;
+            this.groupBox5.TabStop = false;
+            // 
+            // matchCaseCheckBox
+            // 
+            this.matchCaseCheckBox.AutoSize = true;
+            this.matchCaseCheckBox.Location = new System.Drawing.Point(6, 10);
+            this.matchCaseCheckBox.Name = "matchCaseCheckBox";
+            this.matchCaseCheckBox.Size = new System.Drawing.Size(159, 17);
+            this.matchCaseCheckBox.TabIndex = 8;
+            this.matchCaseCheckBox.Text = "Match Case (may be slower)";
+            this.matchCaseCheckBox.UseVisualStyleBackColor = true;
             // 
             // btnFind
             // 
-            this.btnFind.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnFind.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnFind.Location = new System.Drawing.Point(525, 24);
+            this.btnFind.Location = new System.Drawing.Point(666, 8);
             this.btnFind.Name = "btnFind";
             this.btnFind.Size = new System.Drawing.Size(71, 23);
-            this.btnFind.TabIndex = 4;
+            this.btnFind.TabIndex = 7;
             this.btnFind.Text = "Search";
             this.btnFind.UseVisualStyleBackColor = true;
             this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
@@ -153,7 +196,7 @@
             this.Controls.Add(this.splitContainer1);
             this.Name = "GlobalSearch";
             this.PluginIcon = ((System.Drawing.Icon)(resources.GetObject("$this.PluginIcon")));
-            this.Size = new System.Drawing.Size(831, 533);
+            this.Size = new System.Drawing.Size(1050, 537);
             this.TabIcon = ((System.Drawing.Image)(resources.GetObject("$this.TabIcon")));
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
@@ -162,7 +205,10 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -173,8 +219,12 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.Button btnFind;
         private System.Windows.Forms.TextBox searchTextBox;
         private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.ToolTip searchTextToolTip;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.CheckBox matchCaseCheckBox;
+        private System.Windows.Forms.Button btnFind;
     }
 }

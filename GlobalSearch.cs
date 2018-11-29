@@ -1,5 +1,6 @@
 ﻿using Futurez.XrmToolBox.Controls;
 using McTools.Xrm.Connection;
+using Microsoft.VisualBasic.CompilerServices;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -27,6 +28,7 @@ namespace MikeFactorial.XTB.Plugins
         {
             InitializeComponent();
             EntitiesListViewControl1.Initialize(this, Service);
+            EntitiesListViewControl1.SortEntitiesList(0, SortOrder.Ascending);
         }
 
         public event EventHandler<MessageBusEventArgs> OnOutgoingMessage;
@@ -61,92 +63,115 @@ namespace MikeFactorial.XTB.Plugins
                     selectedEntities = selectedEntities.OrderBy(e => e.LogicalName).ToList();
                     for (int i = 0; i < selectedEntities.Count; i++)
                     {
-                        EntityMetadata selectedEntity = selectedEntities[i];
-                        double percentage = (double)(i + 1) / (double)selectedEntities.Count;
-                        percentage = percentage * (double)100;
+                        try
+                        {
+                            EntityMetadata selectedEntity = selectedEntities[i];
+                            double percentage = (double)(i + 1) / (double)selectedEntities.Count;
+                            percentage = percentage * (double)100;
 
-                        worker.ReportProgress(Convert.ToInt32(percentage), $"Searching for {selectedEntity.LogicalName} records.");
-                        // Retrieve the attribute metadata
-                        var req = new RetrieveEntityRequest()
-                        {
-                            LogicalName = selectedEntity.LogicalName,
-                            EntityFilters = EntityFilters.Attributes,
-                            RetrieveAsIfPublished = true
-                        };
-                        var resp = (RetrieveEntityResponse)this.Service.Execute(req);
-
-                        List<AttributeMetadata> attsToSearch = resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.String || meta.AttributeType == AttributeTypeCode.Memo) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList();
-                        Guid guidValue;
-                        if (Guid.TryParse(this.searchTextBox.Text, out guidValue))
-                        {
-                            attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Lookup || meta.AttributeType == AttributeTypeCode.Owner || meta.AttributeType == AttributeTypeCode.Uniqueidentifier || meta.AttributeType == AttributeTypeCode.Customer) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList());
-                        }
-
-                        long intValue;
-                        if (long.TryParse(this.searchTextBox.Text, out intValue))
-                        {
-                            attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.BigInt || meta.AttributeType == AttributeTypeCode.Integer || meta.AttributeType.Value == AttributeTypeCode.Picklist || meta.AttributeType.Value == AttributeTypeCode.State || meta.AttributeType.Value == AttributeTypeCode.Status) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList());
-                        }
-
-                        double doubleValue;
-                        if (double.TryParse(this.searchTextBox.Text, out doubleValue))
-                        {
-                            attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Money || meta.AttributeType == AttributeTypeCode.Decimal || meta.AttributeType.Value == AttributeTypeCode.Double) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList());
-                        }
-                        QueryExpression query = new QueryExpression(selectedEntity.LogicalName);
-                        query.ColumnSet = new ColumnSet();
-                        FilterExpression fe = new FilterExpression(LogicalOperator.Or);
-                        query.ColumnSet.AddColumn(selectedEntity.PrimaryIdAttribute);
-                        AttributeMetadata primaryNameAttribute = resp.EntityMetadata.Attributes.FirstOrDefault(a => a.LogicalName == selectedEntity.PrimaryNameAttribute);
-                        if (primaryNameAttribute != null)
-                        {
-                            if (primaryNameAttribute.IsValidForRead.Value && primaryNameAttribute.IsSearchable.Value)
+                            worker.ReportProgress(Convert.ToInt32(percentage), $"Searching for {selectedEntity.LogicalName} records.");
+                            // Retrieve the attribute metadata
+                            var req = new RetrieveEntityRequest()
                             {
-                                query.ColumnSet.AddColumn(selectedEntity.PrimaryNameAttribute);
+                                LogicalName = selectedEntity.LogicalName,
+                                EntityFilters = EntityFilters.Attributes,
+                                RetrieveAsIfPublished = true
+                            };
+                            var resp = (RetrieveEntityResponse)this.Service.Execute(req);
+
+                            List<AttributeMetadata> attsToSearch = resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.String || meta.AttributeType == AttributeTypeCode.Memo) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList();
+                            Guid guidValue;
+                            if (Guid.TryParse(this.searchTextBox.Text, out guidValue))
+                            {
+                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Lookup || meta.AttributeType == AttributeTypeCode.Owner || meta.AttributeType == AttributeTypeCode.Uniqueidentifier || meta.AttributeType == AttributeTypeCode.Customer) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList());
                             }
-                            if (primaryNameAttribute.IsSearchable.Value)
+
+                            long intValue;
+                            if (long.TryParse(this.searchTextBox.Text, out intValue))
                             {
-                                fe.AddCondition(selectedEntity.PrimaryNameAttribute, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
+                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.BigInt || meta.AttributeType == AttributeTypeCode.Integer || meta.AttributeType.Value == AttributeTypeCode.Picklist || meta.AttributeType.Value == AttributeTypeCode.State || meta.AttributeType.Value == AttributeTypeCode.Status) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList());
                             }
-                        }
-                        if (guidValue != Guid.Empty)
-                        {
-                            fe.AddCondition(selectedEntity.PrimaryIdAttribute, ConditionOperator.Equal, guidValue);
-                        }
-                        attsToSearch = attsToSearch.OrderBy(a => a.LogicalName).ToList();
-                        foreach (AttributeMetadata att in attsToSearch)
-                        {
-                            if (att.LogicalName != selectedEntity.PrimaryNameAttribute && att.LogicalName != selectedEntity.PrimaryIdAttribute)
+
+                            double doubleValue;
+                            if (double.TryParse(this.searchTextBox.Text, out doubleValue))
                             {
-                                query.ColumnSet.AddColumn(att.LogicalName);
-                                if (att.AttributeType == AttributeTypeCode.Lookup || att.AttributeType == AttributeTypeCode.Owner || att.AttributeType == AttributeTypeCode.Uniqueidentifier || att.AttributeType == AttributeTypeCode.Customer)
+                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Money || meta.AttributeType == AttributeTypeCode.Decimal || meta.AttributeType.Value == AttributeTypeCode.Double) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList());
+                            }
+                            QueryExpression query = new QueryExpression(selectedEntity.LogicalName);
+                            query.ColumnSet = new ColumnSet();
+                            FilterExpression fe = new FilterExpression(LogicalOperator.Or);
+                            query.ColumnSet.AddColumn(selectedEntity.PrimaryIdAttribute);
+                            AttributeMetadata primaryNameAttribute = resp.EntityMetadata.Attributes.FirstOrDefault(a => a.LogicalName == selectedEntity.PrimaryNameAttribute);
+                            if (primaryNameAttribute != null)
+                            {
+                                if (primaryNameAttribute.IsValidForRead.Value && primaryNameAttribute.IsSearchable.Value)
                                 {
-                                    fe.AddCondition(att.LogicalName, ConditionOperator.Equal, guidValue);
+                                    query.ColumnSet.AddColumn(selectedEntity.PrimaryNameAttribute);
                                 }
-                                else if (att.AttributeType == AttributeTypeCode.BigInt)
+                                if (primaryNameAttribute.IsSearchable.Value)
                                 {
-                                    fe.AddCondition(att.LogicalName, ConditionOperator.Equal, intValue);
-                                }
-                                else if (att.AttributeType == AttributeTypeCode.Integer || att.AttributeType.Value == AttributeTypeCode.Picklist || att.AttributeType.Value == AttributeTypeCode.State || att.AttributeType.Value == AttributeTypeCode.Status)
-                                {
-                                    fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)intValue);
-                                }
-                                else if (att.AttributeType.Value == AttributeTypeCode.Double)
-                                {
-                                    fe.AddCondition(att.LogicalName, ConditionOperator.Equal, doubleValue);
-                                }
-                                else if (att.AttributeType == AttributeTypeCode.Money || att.AttributeType == AttributeTypeCode.Decimal)
-                                {
-                                    fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (decimal)doubleValue);
-                                }
-                                else
-                                {
-                                    fe.AddCondition(att.LogicalName, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
+                                    fe.AddCondition(selectedEntity.PrimaryNameAttribute, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
                                 }
                             }
+                            if (guidValue != Guid.Empty)
+                            {
+                                fe.AddCondition(selectedEntity.PrimaryIdAttribute, ConditionOperator.Equal, guidValue);
+                            }
+                            attsToSearch = attsToSearch.OrderBy(a => a.LogicalName).ToList();
+                            foreach (AttributeMetadata att in attsToSearch)
+                            {
+                                if (att.LogicalName != selectedEntity.PrimaryNameAttribute && att.LogicalName != selectedEntity.PrimaryIdAttribute)
+                                {
+                                    query.ColumnSet.AddColumn(att.LogicalName);
+                                    if (att.AttributeType == AttributeTypeCode.Lookup || att.AttributeType == AttributeTypeCode.Owner || att.AttributeType == AttributeTypeCode.Uniqueidentifier || att.AttributeType == AttributeTypeCode.Customer)
+                                    {
+                                        fe.AddCondition(att.LogicalName, ConditionOperator.Equal, guidValue);
+                                    }
+                                    else if (att.AttributeType == AttributeTypeCode.BigInt)
+                                    {
+                                        fe.AddCondition(att.LogicalName, ConditionOperator.Equal, intValue);
+                                    }
+                                    else if (att.AttributeType == AttributeTypeCode.Integer || att.AttributeType.Value == AttributeTypeCode.Picklist || att.AttributeType.Value == AttributeTypeCode.State || att.AttributeType.Value == AttributeTypeCode.Status)
+                                    {
+                                        fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)intValue);
+                                    }
+                                    else if (att.AttributeType.Value == AttributeTypeCode.Double)
+                                    {
+                                        fe.AddCondition(att.LogicalName, ConditionOperator.Equal, doubleValue);
+                                    }
+                                    else if (att.AttributeType == AttributeTypeCode.Money || att.AttributeType == AttributeTypeCode.Decimal)
+                                    {
+                                        fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (decimal)doubleValue);
+                                    }
+                                    else
+                                    {
+                                        fe.AddCondition(att.LogicalName, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
+                                    }
+                                }
+                            }
+                            query.Criteria.AddFilter(fe);
+                            EntityCollection results = Service.RetrieveMultiple(query);
+                            if (this.matchCaseCheckBox.Checked)
+                            {
+                                EntityCollection filteredResults = new EntityCollection();
+                                foreach (Entity e in results.Entities)
+                                {
+                                    if (e.Attributes.Any(a => (a.Value != null && LikeOperator.LikeString(a.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))))
+                                    {
+                                        filteredResults.Entities.Add(e);
+                                    }
+                                }
+                                AddTab(filteredResults);
+                            }
+                            else
+                            {
+                                AddTab(results);
+                            }
                         }
-                        query.Criteria.AddFilter(fe);
-                        AddTab(Service.RetrieveMultiple(query));
+                        catch (Exception e)
+                        {
+                            this.LogError(e.ToString());
+                        }
 
 
                     }
