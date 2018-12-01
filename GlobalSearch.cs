@@ -8,6 +8,7 @@ using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
@@ -18,7 +19,7 @@ namespace MikeFactorial.XTB.Plugins
 {
     public partial class GlobalSearch : PluginControlBase, IStatusBarMessenger, IMessageBusHost, IAboutPlugin, IGitHubPlugin, IHelpPlugin
     {
-        public string RepositoryName => "D365SatSamples";
+        public string RepositoryName => "MikeFactorial.XTB.Plugins.GlobalSearch";
 
         public string UserName => "mikefactorial";
 
@@ -78,8 +79,15 @@ namespace MikeFactorial.XTB.Plugins
                                 RetrieveAsIfPublished = true
                             };
                             var resp = (RetrieveEntityResponse)this.Service.Execute(req);
-
+                            if (worker.CancellationPending)
+                            {
+                                return;
+                            }
                             List<AttributeMetadata> attsToSearch = resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.String || meta.AttributeType == AttributeTypeCode.Memo) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList();
+                            if (worker.CancellationPending)
+                            {
+                                return;
+                            }
                             Guid guidValue;
                             if (Guid.TryParse(this.searchTextBox.Text, out guidValue))
                             {
@@ -150,18 +158,27 @@ namespace MikeFactorial.XTB.Plugins
                                 }
                             }
                             query.Criteria.AddFilter(fe);
+                            if (worker.CancellationPending)
+                            {
+                                return;
+                            }
                             EntityCollection results = Service.RetrieveMultiple(query);
+                            if (worker.CancellationPending)
+                            {
+                                return;
+                            }
                             if (this.matchCaseCheckBox.Checked)
                             {
-                                EntityCollection filteredResults = new EntityCollection();
-                                foreach (Entity e in results.Entities)
+                                for(int j = 0; j < results.Entities.Count; j++)
                                 {
-                                    if (e.Attributes.Any(a => (a.Value != null && LikeOperator.LikeString(a.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))))
+                                    Entity e = results.Entities[j];
+                                    if (!e.Attributes.Any(a => (a.Value != null && LikeOperator.LikeString(a.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))))
                                     {
-                                        filteredResults.Entities.Add(e);
+                                        results.Entities.RemoveAt(j);
+                                        j--;
                                     }
                                 }
-                                AddTab(filteredResults);
+                                AddTab(results);
                             }
                             else
                             {
@@ -172,8 +189,6 @@ namespace MikeFactorial.XTB.Plugins
                         {
                             this.LogError(e.ToString());
                         }
-
-
                     }
                 },
                 ProgressChanged = (args) =>
@@ -183,6 +198,7 @@ namespace MikeFactorial.XTB.Plugins
                 },
                 PostWorkCallBack = (args) =>
                 {
+                    this.btnFind.Text = "Search";
                     if (args.Error != null)
                     {
                         MessageBox.Show(args.Error.Message, "Oh crap", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -224,6 +240,7 @@ namespace MikeFactorial.XTB.Plugins
                     gridData.RecordClick += new Cinteros.Xrm.CRMWinForm.CRMRecordEventHandler(gridData_RecordClick);
                     gridData.RecordDoubleClick += new Cinteros.Xrm.CRMWinForm.CRMRecordEventHandler(this.gridData_RecordDoubleClick);
                     gridData.DataSource = collection;
+                    gridData.DataBindingComplete += GridData_DataBindingComplete;
                     TabPage tabPage = new TabPage(collection.EntityName);
                     tabPage.Controls.Add(gridData);
 
@@ -231,6 +248,31 @@ namespace MikeFactorial.XTB.Plugins
                 }
             }
         }
+
+        private void GridData_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            foreach (DataGridViewRow row in ((Cinteros.Xrm.CRMWinForm.CRMGridView)sender).Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if (this.matchCaseCheckBox.Checked)
+                    {
+                        if (LikeOperator.LikeString(cell.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))
+                        {
+                            cell.Style.BackColor = Color.Yellow;
+                        }
+                    }
+                    else
+                    {
+                        if (LikeOperator.LikeString(cell.Value.ToString().ToLower(), searchTextBox.Text.ToLower(), Microsoft.VisualBasic.CompareMethod.Binary))
+                        {
+                            cell.Style.BackColor = Color.Yellow;
+                        }
+                    }
+                }
+            }
+        }
+
         private void OpenEntityReference(EntityReference entref)
         {
             if (!string.IsNullOrEmpty(entref.LogicalName) && !entref.Id.Equals(Guid.Empty))
@@ -282,7 +324,16 @@ namespace MikeFactorial.XTB.Plugins
 
         private void btnFind_Click(object sender, EventArgs e)
         {
-            LoadData(this.EntitiesListViewControl1.CheckedEntities);
+            if (btnFind.Text == "Search")
+            {
+                btnFind.Text = "Cancel";
+                LoadData(this.EntitiesListViewControl1.CheckedEntities);
+            }
+            else
+            {
+                CancelWorker(); // PluginBaseControl method that calls the Background Workers CancelAsync method.
+                btnFind.Text = "Search";
+            }
         }
     }
 }
