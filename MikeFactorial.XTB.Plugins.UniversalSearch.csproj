@@ -153,6 +153,12 @@
       <DependentUpon>GlobalSearch.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\Screenshot.png" />
+    <Content Include="Images\telescope.png" />
+    <Content Include="Images\telescope_32_32.png" />
+    <Content Include="Images\telescope_80_80.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>IF NOT EXIST merged mkdir merged
