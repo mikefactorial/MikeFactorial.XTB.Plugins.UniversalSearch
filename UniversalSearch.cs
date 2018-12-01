@@ -83,7 +83,7 @@ namespace MikeFactorial.XTB.Plugins
                             {
                                 return;
                             }
-                            List<AttributeMetadata> attsToSearch = resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.String || meta.AttributeType == AttributeTypeCode.Memo) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList();
+                            List<AttributeMetadata> attsToSearch = resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.String || meta.AttributeType == AttributeTypeCode.Memo) && meta.IsValidForRead.Value).ToList();
                             if (worker.CancellationPending)
                             {
                                 return;
@@ -91,19 +91,19 @@ namespace MikeFactorial.XTB.Plugins
                             Guid guidValue;
                             if (Guid.TryParse(this.searchTextBox.Text, out guidValue))
                             {
-                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Lookup || meta.AttributeType == AttributeTypeCode.Owner || meta.AttributeType == AttributeTypeCode.Uniqueidentifier || meta.AttributeType == AttributeTypeCode.Customer) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList());
+                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Lookup || meta.AttributeType == AttributeTypeCode.Owner || meta.AttributeType == AttributeTypeCode.Uniqueidentifier || meta.AttributeType == AttributeTypeCode.Customer) && meta.IsValidForRead.Value).ToList());
                             }
 
                             long intValue;
                             if (long.TryParse(this.searchTextBox.Text, out intValue))
                             {
-                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.BigInt || meta.AttributeType == AttributeTypeCode.Integer || meta.AttributeType.Value == AttributeTypeCode.Picklist || meta.AttributeType.Value == AttributeTypeCode.State || meta.AttributeType.Value == AttributeTypeCode.Status) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList());
+                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.BigInt || meta.AttributeType == AttributeTypeCode.Integer || meta.AttributeType.Value == AttributeTypeCode.Picklist || meta.AttributeType.Value == AttributeTypeCode.State || meta.AttributeType.Value == AttributeTypeCode.Status) && meta.IsValidForRead.Value).ToList());
                             }
 
                             double doubleValue;
                             if (double.TryParse(this.searchTextBox.Text, out doubleValue))
                             {
-                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Money || meta.AttributeType == AttributeTypeCode.Decimal || meta.AttributeType.Value == AttributeTypeCode.Double) && meta.IsValidForRead.Value && meta.IsSearchable.Value).ToList());
+                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Money || meta.AttributeType == AttributeTypeCode.Decimal || meta.AttributeType.Value == AttributeTypeCode.Double) && meta.IsValidForRead.Value).ToList());
                             }
                             QueryExpression query = new QueryExpression(selectedEntity.LogicalName);
                             query.ColumnSet = new ColumnSet();
@@ -131,36 +131,39 @@ namespace MikeFactorial.XTB.Plugins
                             {
                                 if (att.LogicalName != selectedEntity.PrimaryNameAttribute && att.LogicalName != selectedEntity.PrimaryIdAttribute)
                                 {
-                                    query.ColumnSet.AddColumn(att.LogicalName);
-                                    if (att.AttributeType == AttributeTypeCode.Lookup || att.AttributeType == AttributeTypeCode.Owner || att.AttributeType == AttributeTypeCode.Uniqueidentifier || att.AttributeType == AttributeTypeCode.Customer)
+                                    if (string.IsNullOrEmpty(att.AttributeOf))
                                     {
-                                        fe.AddCondition(att.LogicalName, ConditionOperator.Equal, guidValue);
-                                        conditionAdded = true;
-                                    }
-                                    else if (att.AttributeType == AttributeTypeCode.BigInt)
-                                    {
-                                        fe.AddCondition(att.LogicalName, ConditionOperator.Equal, intValue);
-                                        conditionAdded = true;
-                                    }
-                                    else if (att.AttributeType == AttributeTypeCode.Integer || att.AttributeType.Value == AttributeTypeCode.Picklist || att.AttributeType.Value == AttributeTypeCode.State || att.AttributeType.Value == AttributeTypeCode.Status)
-                                    {
-                                        fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)intValue);
-                                        conditionAdded = true;
-                                    }
-                                    else if (att.AttributeType.Value == AttributeTypeCode.Double)
-                                    {
-                                        fe.AddCondition(att.LogicalName, ConditionOperator.Equal, doubleValue);
-                                        conditionAdded = true;
-                                    }
-                                    else if (att.AttributeType == AttributeTypeCode.Money || att.AttributeType == AttributeTypeCode.Decimal)
-                                    {
-                                        fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (decimal)doubleValue);
-                                        conditionAdded = true;
-                                    }
-                                    else
-                                    {
-                                        fe.AddCondition(att.LogicalName, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
-                                        conditionAdded = true;
+                                        query.ColumnSet.AddColumn(att.LogicalName);
+                                        if (att.AttributeType == AttributeTypeCode.Lookup || att.AttributeType == AttributeTypeCode.Owner || att.AttributeType == AttributeTypeCode.Uniqueidentifier || att.AttributeType == AttributeTypeCode.Customer)
+                                        {
+                                            fe.AddCondition(att.LogicalName, ConditionOperator.Equal, guidValue);
+                                            conditionAdded = true;
+                                        }
+                                        else if (att.AttributeType == AttributeTypeCode.BigInt)
+                                        {
+                                            fe.AddCondition(att.LogicalName, ConditionOperator.Equal, intValue);
+                                            conditionAdded = true;
+                                        }
+                                        else if (att.AttributeType == AttributeTypeCode.Integer || att.AttributeType.Value == AttributeTypeCode.Picklist || att.AttributeType.Value == AttributeTypeCode.State || att.AttributeType.Value == AttributeTypeCode.Status)
+                                        {
+                                            fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)intValue);
+                                            conditionAdded = true;
+                                        }
+                                        else if (att.AttributeType.Value == AttributeTypeCode.Double)
+                                        {
+                                            fe.AddCondition(att.LogicalName, ConditionOperator.Equal, doubleValue);
+                                            conditionAdded = true;
+                                        }
+                                        else if (att.AttributeType == AttributeTypeCode.Money || att.AttributeType == AttributeTypeCode.Decimal)
+                                        {
+                                            fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (decimal)doubleValue);
+                                            conditionAdded = true;
+                                        }
+                                        else
+                                        {
+                                            fe.AddCondition(att.LogicalName, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
+                                            conditionAdded = true;
+                                        }
                                     }
                                 }
                             }
@@ -265,6 +268,25 @@ namespace MikeFactorial.XTB.Plugins
             {
                 foreach (DataGridViewCell cell in row.Cells)
                 {
+                    Guid guidValue;
+                    Guid guidCellValue;
+                    if (Guid.TryParse(this.searchTextBox.Text, out guidValue) && Guid.TryParse(cell.Value.ToString(), out guidCellValue) && guidValue == guidCellValue)
+                    {
+                        cell.Style.BackColor = Color.Yellow;
+                    }
+                    long intValue;
+                    long intCellValue;
+                    if (long.TryParse(this.searchTextBox.Text, out intValue) && long.TryParse(cell.Value.ToString(), out intCellValue) && intValue == intCellValue)
+                    {
+                        cell.Style.BackColor = Color.Yellow;
+                    }
+                    double doubleValue;
+                    double doubleCellValue;
+                    if (double.TryParse(this.searchTextBox.Text, out doubleValue) && double.TryParse(cell.Value.ToString(), out doubleCellValue) && doubleValue == doubleCellValue)
+                    {
+                        cell.Style.BackColor = Color.Yellow;
+                    }
+
                     if (this.matchCaseCheckBox.Checked)
                     {
                         if (LikeOperator.LikeString(cell.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))
