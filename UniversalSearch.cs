@@ -126,6 +126,7 @@ namespace MikeFactorial.XTB.Plugins
                                 fe.AddCondition(selectedEntity.PrimaryIdAttribute, ConditionOperator.Equal, guidValue);
                             }
                             attsToSearch = attsToSearch.OrderBy(a => a.LogicalName).ToList();
+                            bool conditionAdded = false;
                             foreach (AttributeMetadata att in attsToSearch)
                             {
                                 if (att.LogicalName != selectedEntity.PrimaryNameAttribute && att.LogicalName != selectedEntity.PrimaryIdAttribute)
@@ -134,26 +135,32 @@ namespace MikeFactorial.XTB.Plugins
                                     if (att.AttributeType == AttributeTypeCode.Lookup || att.AttributeType == AttributeTypeCode.Owner || att.AttributeType == AttributeTypeCode.Uniqueidentifier || att.AttributeType == AttributeTypeCode.Customer)
                                     {
                                         fe.AddCondition(att.LogicalName, ConditionOperator.Equal, guidValue);
+                                        conditionAdded = true;
                                     }
                                     else if (att.AttributeType == AttributeTypeCode.BigInt)
                                     {
                                         fe.AddCondition(att.LogicalName, ConditionOperator.Equal, intValue);
+                                        conditionAdded = true;
                                     }
                                     else if (att.AttributeType == AttributeTypeCode.Integer || att.AttributeType.Value == AttributeTypeCode.Picklist || att.AttributeType.Value == AttributeTypeCode.State || att.AttributeType.Value == AttributeTypeCode.Status)
                                     {
                                         fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)intValue);
+                                        conditionAdded = true;
                                     }
                                     else if (att.AttributeType.Value == AttributeTypeCode.Double)
                                     {
                                         fe.AddCondition(att.LogicalName, ConditionOperator.Equal, doubleValue);
+                                        conditionAdded = true;
                                     }
                                     else if (att.AttributeType == AttributeTypeCode.Money || att.AttributeType == AttributeTypeCode.Decimal)
                                     {
                                         fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (decimal)doubleValue);
+                                        conditionAdded = true;
                                     }
                                     else
                                     {
                                         fe.AddCondition(att.LogicalName, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
+                                        conditionAdded = true;
                                     }
                                 }
                             }
@@ -162,27 +169,30 @@ namespace MikeFactorial.XTB.Plugins
                             {
                                 return;
                             }
-                            EntityCollection results = Service.RetrieveMultiple(query);
                             if (worker.CancellationPending)
                             {
                                 return;
                             }
-                            if (this.matchCaseCheckBox.Checked)
+                            if (conditionAdded)
                             {
-                                for(int j = 0; j < results.Entities.Count; j++)
+                                EntityCollection results = Service.RetrieveMultiple(query);
+                                if (this.matchCaseCheckBox.Checked)
                                 {
-                                    Entity e = results.Entities[j];
-                                    if (!e.Attributes.Any(a => (a.Value != null && LikeOperator.LikeString(a.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))))
+                                    for (int j = 0; j < results.Entities.Count; j++)
                                     {
-                                        results.Entities.RemoveAt(j);
-                                        j--;
+                                        Entity e = results.Entities[j];
+                                        if (!e.Attributes.Any(a => (a.Value != null && LikeOperator.LikeString(a.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))))
+                                        {
+                                            results.Entities.RemoveAt(j);
+                                            j--;
+                                        }
                                     }
+                                    AddTab(results);
                                 }
-                                AddTab(results);
-                            }
-                            else
-                            {
-                                AddTab(results);
+                                else
+                                {
+                                    AddTab(results);
+                                }
                             }
                         }
                         catch (Exception e)
