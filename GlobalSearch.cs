@@ -17,15 +17,15 @@ using XrmToolBox.Extensibility.Interfaces;
 
 namespace MikeFactorial.XTB.Plugins
 {
-    public partial class GlobalSearch : PluginControlBase, IStatusBarMessenger, IMessageBusHost, IAboutPlugin, IGitHubPlugin, IHelpPlugin
+    public partial class UniversalSearch : PluginControlBase, IStatusBarMessenger, IMessageBusHost, IAboutPlugin, IGitHubPlugin, IHelpPlugin
     {
-        public string RepositoryName => "MikeFactorial.XTB.Plugins.GlobalSearch";
+        public string RepositoryName => "MikeFactorial.XTB.Plugins.UniversalSearch";
 
         public string UserName => "mikefactorial";
 
         public string HelpUrl => "https://www.mikefactorial.com/";
 
-        public GlobalSearch()
+        public UniversalSearch()
         {
             InitializeComponent();
             EntitiesListViewControl1.Initialize(this, Service);

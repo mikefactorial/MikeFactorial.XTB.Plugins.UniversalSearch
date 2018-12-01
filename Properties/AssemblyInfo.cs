@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("D365 Saturday Sample Tool")]
+[assembly: AssemblyTitle("Universal Search for XrmToolBox by Mike!")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Rapp Tools")]
-[assembly: AssemblyProduct("D365SatSampleTool")]
-[assembly: AssemblyCopyright("Copyright © Jonas Rapp 2018")]
+[assembly: AssemblyCompany("Mike!")]
+[assembly: AssemblyProduct("Universal Search")]
+[assembly: AssemblyCopyright("Copyright © Mike! 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

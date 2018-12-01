@@ -1,6 +1,6 @@
 ﻿namespace MikeFactorial.XTB.Plugins
 {
-    partial class GlobalSearch
+    partial class UniversalSearch
     {
         /// <summary> 
         /// Variable nécessaire au concepteur.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GlobalSearch));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UniversalSearch));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.EntitiesListViewControl1 = new Futurez.XrmToolBox.Controls.EntitiesListControl();
@@ -189,12 +189,12 @@
             this.btnFind.UseVisualStyleBackColor = true;
             this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
             // 
-            // GlobalSearch
+            // UniversalSearch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
-            this.Name = "GlobalSearch";
+            this.Name = "UniversalSearch";
             this.PluginIcon = ((System.Drawing.Icon)(resources.GetObject("$this.PluginIcon")));
             this.Size = new System.Drawing.Size(1050, 537);
             this.TabIcon = ((System.Drawing.Image)(resources.GetObject("$this.TabIcon")));

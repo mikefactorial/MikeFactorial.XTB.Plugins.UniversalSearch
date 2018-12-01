@@ -9,8 +9,8 @@
     <ProjectGuid>{DE437E99-A402-4FE3-8CAC-944FF3F57904}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MikeFactorial.XTB.Plugins.GlobalSearch</RootNamespace>
-    <AssemblyName>MikeFactorial.XTB.Plugins.GlobalSearch</AssemblyName>
+    <RootNamespace>MikeFactorial.XTB.Plugins.UniversalSearch</RootNamespace>
+    <AssemblyName>MikeFactorial.XTB.Plugins.UniversalSearch</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -131,7 +131,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GlobalSearchTool.cs" />
+    <Compile Include="UniversalSearchTool.cs" />
     <Compile Include="GlobalSearch.cs">
       <SubType>UserControl</SubType>
     </Compile>
