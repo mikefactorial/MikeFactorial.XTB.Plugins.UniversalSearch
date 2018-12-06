@@ -23,7 +23,7 @@ namespace MikeFactorial.XTB.Plugins
 
         public string UserName => "mikefactorial";
 
-        public string HelpUrl => "https://www.mikefactorial.com/";
+        public string HelpUrl => "https://mikefactorial.com/dynamics-365-universal-search-for-xrmtoolbox/";
 
         public UniversalSearch()
         {
@@ -105,6 +105,12 @@ namespace MikeFactorial.XTB.Plugins
                             {
                                 attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Money || meta.AttributeType == AttributeTypeCode.Decimal || meta.AttributeType.Value == AttributeTypeCode.Double) && meta.IsValidForRead.Value).ToList());
                             }
+                            DateTime dateTimeValue;
+                            if (DateTime.TryParse(this.searchTextBox.Text, out dateTimeValue))
+                            {
+                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.DateTime) && meta.IsValidForRead.Value).ToList());
+                            }
+
                             QueryExpression query = new QueryExpression(selectedEntity.LogicalName);
                             query.ColumnSet = new ColumnSet();
                             FilterExpression fe = new FilterExpression(LogicalOperator.Or);
@@ -147,6 +153,11 @@ namespace MikeFactorial.XTB.Plugins
                                         else if (att.AttributeType == AttributeTypeCode.Integer || att.AttributeType.Value == AttributeTypeCode.Picklist || att.AttributeType.Value == AttributeTypeCode.State || att.AttributeType.Value == AttributeTypeCode.Status)
                                         {
                                             fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)intValue);
+                                            conditionAdded = true;
+                                        }
+                                        else if (att.AttributeType.Value == AttributeTypeCode.DateTime)
+                                        {
+                                            fe.AddCondition(att.LogicalName, ConditionOperator.On, dateTimeValue);
                                             conditionAdded = true;
                                         }
                                         else if (att.AttributeType.Value == AttributeTypeCode.Double)
@@ -283,6 +294,12 @@ namespace MikeFactorial.XTB.Plugins
                     double doubleValue;
                     double doubleCellValue;
                     if (double.TryParse(this.searchTextBox.Text, out doubleValue) && double.TryParse(cell.Value.ToString(), out doubleCellValue) && doubleValue == doubleCellValue)
+                    {
+                        cell.Style.BackColor = Color.Yellow;
+                    }
+                    DateTime dateTimeValue;
+                    DateTime dateTimeCellValue;
+                    if (DateTime.TryParse(this.searchTextBox.Text, out dateTimeValue) && DateTime.TryParse(cell.Value.ToString(), out dateTimeCellValue) && dateTimeValue == dateTimeCellValue)
                     {
                         cell.Style.BackColor = Color.Yellow;
                     }

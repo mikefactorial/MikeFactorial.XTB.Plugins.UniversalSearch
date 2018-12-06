@@ -160,6 +160,7 @@
     <Content Include="Images\Screenshot.png" />
     <Content Include="Images\telescope.png" />
     <Content Include="Images\telescope_32_32.png" />
+    <Content Include="Images\telescope_32_32_3S3_icon.ico" />
     <Content Include="Images\telescope_80_80.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

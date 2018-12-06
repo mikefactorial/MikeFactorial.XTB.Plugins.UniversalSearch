@@ -36,12 +36,12 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.searchTextBox = new System.Windows.Forms.TextBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.searchTextToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.matchCaseCheckBox = new System.Windows.Forms.CheckBox();
             this.btnFind = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.searchTextBox = new System.Windows.Forms.TextBox();
+            this.searchTextToolTip = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -49,8 +49,8 @@
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -131,32 +131,7 @@
             this.groupBox3.Size = new System.Drawing.Size(762, 82);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Search Criteria";
-            // 
-            // searchTextBox
-            // 
-            this.searchTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.searchTextBox.Location = new System.Drawing.Point(3, 16);
-            this.searchTextBox.Margin = new System.Windows.Forms.Padding(1);
-            this.searchTextBox.Name = "searchTextBox";
-            this.searchTextBox.Size = new System.Drawing.Size(734, 20);
-            this.searchTextBox.TabIndex = 5;
-            this.searchTextToolTip.SetToolTip(this.searchTextBox, "Enter the value to search. Use wildcard (*) to perform a wildcard search.");
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.searchTextBox);
-            this.groupBox2.Location = new System.Drawing.Point(10, 14);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(740, 43);
-            this.groupBox2.TabIndex = 6;
-            this.groupBox2.TabStop = false;
-            // 
-            // searchTextToolTip
-            // 
-            this.searchTextToolTip.AutoPopDelay = 1000;
-            this.searchTextToolTip.InitialDelay = 500;
-            this.searchTextToolTip.ReshowDelay = 100;
+            this.groupBox3.Text = "Search Criteria (Use asterisks * to perform a wildcard search)";
             // 
             // groupBox5
             // 
@@ -189,6 +164,31 @@
             this.btnFind.UseVisualStyleBackColor = true;
             this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.searchTextBox);
+            this.groupBox2.Location = new System.Drawing.Point(10, 14);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(740, 43);
+            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabStop = false;
+            // 
+            // searchTextBox
+            // 
+            this.searchTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.searchTextBox.Location = new System.Drawing.Point(3, 16);
+            this.searchTextBox.Margin = new System.Windows.Forms.Padding(1);
+            this.searchTextBox.Name = "searchTextBox";
+            this.searchTextBox.Size = new System.Drawing.Size(734, 20);
+            this.searchTextBox.TabIndex = 5;
+            this.searchTextToolTip.SetToolTip(this.searchTextBox, "Enter the value to search. Use wildcard (*) to perform a wildcard search.");
+            // 
+            // searchTextToolTip
+            // 
+            this.searchTextToolTip.AutoPopDelay = 1000;
+            this.searchTextToolTip.InitialDelay = 500;
+            this.searchTextToolTip.ReshowDelay = 100;
+            // 
             // UniversalSearch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -205,10 +205,10 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
 
         }
