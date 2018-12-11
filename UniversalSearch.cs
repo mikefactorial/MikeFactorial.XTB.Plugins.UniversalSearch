@@ -157,7 +157,7 @@ namespace MikeFactorial.XTB.Plugins
                                         }
                                         else if (att.AttributeType.Value == AttributeTypeCode.DateTime)
                                         {
-                                            fe.AddCondition(att.LogicalName, ConditionOperator.On, dateTimeValue);
+                                            fe.AddCondition(att.LogicalName, ConditionOperator.On, dateTimeValue.ToUniversalTime().Date);
                                             conditionAdded = true;
                                         }
                                         else if (att.AttributeType.Value == AttributeTypeCode.Double)
@@ -190,12 +190,17 @@ namespace MikeFactorial.XTB.Plugins
                             if (conditionAdded)
                             {
                                 EntityCollection results = Service.RetrieveMultiple(query);
-                                if (this.matchCaseCheckBox.Checked)
+                                if (this.matchCaseCheckBox.Checked || dateTimeValue != DateTime.MinValue)
                                 {
                                     for (int j = 0; j < results.Entities.Count; j++)
                                     {
                                         Entity e = results.Entities[j];
-                                        if (!e.Attributes.Any(a => (a.Value != null && LikeOperator.LikeString(a.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))))
+                                        if (this.matchCaseCheckBox.Checked && !e.Attributes.Any(a => (a.Value != null && LikeOperator.LikeString(a.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))))
+                                        {
+                                            results.Entities.RemoveAt(j);
+                                            j--;
+                                        }
+                                        else if (dateTimeValue != DateTime.MinValue && !e.Attributes.Any(a => (a.Value != null && a.Value is DateTime && ((DateTime)a.Value).Date == dateTimeValue.Date)))
                                         {
                                             results.Entities.RemoveAt(j);
                                             j--;
@@ -244,6 +249,7 @@ namespace MikeFactorial.XTB.Plugins
                 if (collection.Entities.Count > 0)
                 {
                     Cinteros.Xrm.CRMWinForm.CRMGridView gridData = new Cinteros.Xrm.CRMWinForm.CRMGridView();
+                    gridData.ShowLocalTimes = false;
                     gridData.AllowUserToAddRows = false;
                     gridData.AllowUserToDeleteRows = false;
                     gridData.AllowUserToOrderColumns = true;
@@ -299,7 +305,7 @@ namespace MikeFactorial.XTB.Plugins
                     }
                     DateTime dateTimeValue;
                     DateTime dateTimeCellValue;
-                    if (DateTime.TryParse(this.searchTextBox.Text, out dateTimeValue) && DateTime.TryParse(cell.Value.ToString(), out dateTimeCellValue) && dateTimeValue == dateTimeCellValue)
+                    if (DateTime.TryParse(this.searchTextBox.Text, out dateTimeValue) && DateTime.TryParse(cell.Value.ToString(), out dateTimeCellValue) && dateTimeValue.Date == dateTimeCellValue.Date)
                     {
                         cell.Style.BackColor = Color.Yellow;
                     }
