@@ -17,7 +17,7 @@ using XrmToolBox.Extensibility.Interfaces;
 
 namespace MikeFactorial.XTB.Plugins
 {
-    public partial class UniversalSearch : PluginControlBase, IStatusBarMessenger, IMessageBusHost, IAboutPlugin, IGitHubPlugin, IHelpPlugin
+    public partial class UniversalSearch : PluginControlBase, IStatusBarMessenger, IAboutPlugin, IGitHubPlugin, IHelpPlugin
     {
         public string RepositoryName => "MikeFactorial.XTB.Plugins.UniversalSearch";
 
@@ -32,7 +32,6 @@ namespace MikeFactorial.XTB.Plugins
             EntitiesListViewControl1.SortEntitiesList(0, SortOrder.Ascending);
         }
 
-        public event EventHandler<MessageBusEventArgs> OnOutgoingMessage;
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
         delegate void AddTabCallback(EntityCollection collection);
         /// <summary>
