@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -110,7 +111,7 @@ namespace MikeFactorial.XTB.Plugins
                                 attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Money || meta.AttributeType == AttributeTypeCode.Decimal || meta.AttributeType.Value == AttributeTypeCode.Double) && meta.IsValidForRead.Value).ToList());
                             }
                             DateTime dateTimeValue;
-                            if (DateTime.TryParse(this.searchTextBox.Text, out dateTimeValue))
+                            if (DateTime.TryParse(this.searchTextBox.Text, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out dateTimeValue))
                             {
                                 attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.DateTime) && meta.IsValidForRead.Value).ToList());
                             }
@@ -191,7 +192,7 @@ namespace MikeFactorial.XTB.Plugins
                                         }
                                         else if (att.AttributeType.Value == AttributeTypeCode.DateTime)
                                         {
-                                            fe.AddCondition(att.LogicalName, ConditionOperator.On, dateTimeValue.ToUniversalTime().Date);
+                                            fe.AddCondition(att.LogicalName, ConditionOperator.On, dateTimeValue.Date);
                                             conditionAdded = true;
                                         }
                                         else if (att.AttributeType.Value == AttributeTypeCode.Double)
@@ -224,33 +225,45 @@ namespace MikeFactorial.XTB.Plugins
                             if (conditionAdded)
                             {
                                 EntityCollection results = Service.RetrieveMultiple(query);
-                                foreach (AttributeMetadata att in attsToSearch)
+                                if (results.Entities != null && results.Entities.Count > 0)
                                 {
-                                    //Here we are going to replace the integer value with the display value for the picklist we returned in the results.
-                                    ReplacePicklistIntegerWithText(att, intValue, results);
-                                }
+                                    //Here we are going to replace the integer value with the display value for the picklist we returned in the results and convert UTC date/time to local for the results to display correctly..
+                                    UpdateDisplayTexts(attsToSearch, intValue, results);
 
-                                if (this.matchCaseCheckBox.Checked || dateTimeValue != DateTime.MinValue)
-                                {
-                                    for (int j = 0; j < results.Entities.Count; j++)
+                                    if (this.matchCaseCheckBox.Checked || dateTimeValue != DateTime.MinValue)
                                     {
-                                        Entity e = results.Entities[j];
-                                        if (this.matchCaseCheckBox.Checked && !e.Attributes.Any(a => (a.Value != null && LikeOperator.LikeString(a.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))))
+                                        for (int j = 0; j < results.Entities.Count; j++)
                                         {
-                                            results.Entities.RemoveAt(j);
-                                            j--;
+                                            Entity e = results.Entities[j];
+                                            if (this.matchCaseCheckBox.Checked && !e.Attributes.Any(a => (a.Value != null && LikeOperator.LikeString(a.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))))
+                                            {
+                                                results.Entities.RemoveAt(j);
+                                                j--;
+                                            }
+                                            else if (dateTimeValue != DateTime.MinValue)
+                                            {
+                                                bool found = false;
+                                                foreach (var att in attsToSearch.Where(a => a.AttributeType != null && a.AttributeType.Value == AttributeTypeCode.DateTime))
+                                                {
+                                                    if(results.Entities[j].Contains(att.LogicalName) && ((DateTime)results.Entities[j][att.LogicalName]).Date == dateTimeValue.Date)
+                                                    {
+                                                        found = true;
+                                                        break;
+                                                    }
+                                                }
+                                                if (!found)
+                                                {
+                                                    results.Entities.RemoveAt(j);
+                                                    j--;
+                                                }
+                                            }
                                         }
-                                        else if (dateTimeValue != DateTime.MinValue && !e.Attributes.Any(a => (a.Value != null && a.Value is DateTime && ((DateTime)a.Value).Date == dateTimeValue.Date)))
-                                        {
-                                            results.Entities.RemoveAt(j);
-                                            j--;
-                                        }
+                                        AddTab(results);
                                     }
-                                    AddTab(results);
-                                }
-                                else
-                                {
-                                    AddTab(results);
+                                    else
+                                    {
+                                        AddTab(results);
+                                    }
                                 }
                             }
                         }
@@ -277,32 +290,41 @@ namespace MikeFactorial.XTB.Plugins
             });
         }
 
-        private void ReplacePicklistIntegerWithText(AttributeMetadata att, long intValue, EntityCollection results)
+        private void UpdateDisplayTexts(List<AttributeMetadata> attsToSearch, long intValue, EntityCollection results)
         {
-            if (att.AttributeType.Value == AttributeTypeCode.Picklist && intValue == long.MinValue)
+            foreach (AttributeMetadata att in attsToSearch.Where(att => att.AttributeType != null && (att.AttributeType.Value == AttributeTypeCode.Picklist || att.AttributeType.Value == AttributeTypeCode.DateTime)))
             {
-                PicklistAttributeMetadata pick = (PicklistAttributeMetadata)att;
-                if (pick.OptionSet != null)
+                if (att.AttributeType.Value == AttributeTypeCode.Picklist && intValue == long.MinValue)
                 {
-                    foreach (var option in pick.OptionSet.Options)
+                    PicklistAttributeMetadata pick = (PicklistAttributeMetadata)att;
+                    if (pick.OptionSet != null)
                     {
-                        if (option.Label != null && option.Label.UserLocalizedLabel != null && option.Value != null)
+                        foreach (var option in pick.OptionSet.Options)
                         {
-                            if (!matchCaseCheckBox.Checked)
+                            if (option.Label != null && option.Label.UserLocalizedLabel != null && option.Value != null)
                             {
-                                if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text), RegexOptions.IgnoreCase))
+                                if (!matchCaseCheckBox.Checked)
+                                {
+                                    if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text), RegexOptions.IgnoreCase))
+                                    {
+                                        for (int j = 0; j < results.Entities.Count; j++)
+                                        {
+                                            if (results.Entities[j].Contains(pick.LogicalName))
+                                            {
+                                                results.Entities[j][pick.LogicalName] = option.Label.UserLocalizedLabel.Label;
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text)))
                                 {
                                     for (int j = 0; j < results.Entities.Count; j++)
                                     {
-                                        results.Entities[j][pick.LogicalName] = option.Label.UserLocalizedLabel.Label;
+                                        if (results.Entities[j].Contains(pick.LogicalName))
+                                        {
+                                            results.Entities[j][pick.LogicalName] = option.Label.UserLocalizedLabel.Label;
+                                        }
                                     }
-                                }
-                            }
-                            else if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text)))
-                            {
-                                for (int j = 0; j < results.Entities.Count; j++)
-                                {
-                                    results.Entities[j][pick.LogicalName] = option.Label.UserLocalizedLabel.Label;
                                 }
                             }
                         }
@@ -383,7 +405,7 @@ namespace MikeFactorial.XTB.Plugins
                     }
                     DateTime dateTimeValue;
                     DateTime dateTimeCellValue;
-                    if (DateTime.TryParse(this.searchTextBox.Text, out dateTimeValue) && DateTime.TryParse(cell.Value.ToString(), out dateTimeCellValue) && dateTimeValue.Date == dateTimeCellValue.Date)
+                    if (DateTime.TryParse(this.searchTextBox.Text, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out dateTimeValue) && DateTime.TryParse(cell.Value.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out dateTimeCellValue) && dateTimeValue.Date == dateTimeCellValue.Date)
                     {
                         cell.Style.BackColor = Color.Yellow;
                     }
