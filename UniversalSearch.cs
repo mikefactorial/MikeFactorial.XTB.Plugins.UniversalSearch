@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Args;
@@ -82,7 +83,7 @@ namespace MikeFactorial.XTB.Plugins
                             {
                                 return;
                             }
-                            List<AttributeMetadata> attsToSearch = resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.String || meta.AttributeType == AttributeTypeCode.Memo) && meta.IsValidForRead.Value).ToList();
+                            List<AttributeMetadata> attsToSearch = resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.String || meta.AttributeType == AttributeTypeCode.Memo || meta.AttributeType == AttributeTypeCode.Picklist) && meta.IsValidForRead.Value).ToList();
                             if (worker.CancellationPending)
                             {
                                 return;
@@ -97,6 +98,10 @@ namespace MikeFactorial.XTB.Plugins
                             if (long.TryParse(this.searchTextBox.Text, out intValue))
                             {
                                 attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.BigInt || meta.AttributeType == AttributeTypeCode.Integer || meta.AttributeType.Value == AttributeTypeCode.Picklist || meta.AttributeType.Value == AttributeTypeCode.State || meta.AttributeType.Value == AttributeTypeCode.Status) && meta.IsValidForRead.Value).ToList());
+                            }
+                            else
+                            {
+                                intValue = long.MinValue;
                             }
 
                             double doubleValue;
@@ -151,8 +156,38 @@ namespace MikeFactorial.XTB.Plugins
                                         }
                                         else if (att.AttributeType == AttributeTypeCode.Integer || att.AttributeType.Value == AttributeTypeCode.Picklist || att.AttributeType.Value == AttributeTypeCode.State || att.AttributeType.Value == AttributeTypeCode.Status)
                                         {
-                                            fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)intValue);
-                                            conditionAdded = true;
+                                            if (att.AttributeType.Value == AttributeTypeCode.Picklist && intValue == long.MinValue)
+                                            {
+                                                //Here we are going to search for the picklist display value rather than the value
+                                                PicklistAttributeMetadata pick = (PicklistAttributeMetadata)att;
+                                                if (pick.OptionSet != null)
+                                                {
+                                                    foreach (var option in pick.OptionSet.Options)
+                                                    {
+                                                        if (option.Label != null && option.Label.UserLocalizedLabel != null && option.Value != null)
+                                                        {
+                                                            if (!matchCaseCheckBox.Checked)
+                                                            {
+                                                                if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text), RegexOptions.IgnoreCase))
+                                                                {
+                                                                    fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)option.Value.Value);
+                                                                    conditionAdded = true;
+                                                                }
+                                                            }
+                                                            else if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text)))
+                                                            {
+                                                                fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)option.Value.Value);
+                                                                conditionAdded = true;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)intValue);
+                                                conditionAdded = true;
+                                            }
                                         }
                                         else if (att.AttributeType.Value == AttributeTypeCode.DateTime)
                                         {
@@ -189,6 +224,12 @@ namespace MikeFactorial.XTB.Plugins
                             if (conditionAdded)
                             {
                                 EntityCollection results = Service.RetrieveMultiple(query);
+                                foreach (AttributeMetadata att in attsToSearch)
+                                {
+                                    //Here we are going to replace the integer value with the display value for the picklist we returned in the results.
+                                    ReplacePicklistIntegerWithText(att, intValue, results);
+                                }
+
                                 if (this.matchCaseCheckBox.Checked || dateTimeValue != DateTime.MinValue)
                                 {
                                     for (int j = 0; j < results.Entities.Count; j++)
@@ -236,6 +277,44 @@ namespace MikeFactorial.XTB.Plugins
             });
         }
 
+        private void ReplacePicklistIntegerWithText(AttributeMetadata att, long intValue, EntityCollection results)
+        {
+            if (att.AttributeType.Value == AttributeTypeCode.Picklist && intValue == long.MinValue)
+            {
+                PicklistAttributeMetadata pick = (PicklistAttributeMetadata)att;
+                if (pick.OptionSet != null)
+                {
+                    foreach (var option in pick.OptionSet.Options)
+                    {
+                        if (option.Label != null && option.Label.UserLocalizedLabel != null && option.Value != null)
+                        {
+                            if (!matchCaseCheckBox.Checked)
+                            {
+                                if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text), RegexOptions.IgnoreCase))
+                                {
+                                    for (int j = 0; j < results.Entities.Count; j++)
+                                    {
+                                        results.Entities[j][pick.LogicalName] = option.Label.UserLocalizedLabel.Label;
+                                    }
+                                }
+                            }
+                            else if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text)))
+                            {
+                                for (int j = 0; j < results.Entities.Count; j++)
+                                {
+                                    results.Entities[j][pick.LogicalName] = option.Label.UserLocalizedLabel.Label;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static string WildCardToRegular(string value)
+        {
+            return "^" + Regex.Escape(value).Replace("\\*", ".*") + "$";
+        }
         private void AddTab(EntityCollection collection)
         {
             if (this.tabControl1.InvokeRequired)
