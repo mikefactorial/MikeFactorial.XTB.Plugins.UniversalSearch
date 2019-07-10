@@ -37,6 +37,8 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.searchLookupText = new System.Windows.Forms.CheckBox();
+            this.searchOptionSetText = new System.Windows.Forms.CheckBox();
             this.matchCaseCheckBox = new System.Windows.Forms.CheckBox();
             this.btnFind = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -135,6 +137,8 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.searchLookupText);
+            this.groupBox5.Controls.Add(this.searchOptionSetText);
             this.groupBox5.Controls.Add(this.matchCaseCheckBox);
             this.groupBox5.Controls.Add(this.btnFind);
             this.groupBox5.Location = new System.Drawing.Point(10, 50);
@@ -142,6 +146,26 @@
             this.groupBox5.Size = new System.Drawing.Size(740, 32);
             this.groupBox5.TabIndex = 7;
             this.groupBox5.TabStop = false;
+            // 
+            // searchLookupText
+            // 
+            this.searchLookupText.AutoSize = true;
+            this.searchLookupText.Location = new System.Drawing.Point(373, 10);
+            this.searchLookupText.Name = "searchLookupText";
+            this.searchLookupText.Size = new System.Drawing.Size(199, 17);
+            this.searchLookupText.TabIndex = 10;
+            this.searchLookupText.Text = "Search Lookup Text (may be slower)";
+            this.searchLookupText.UseVisualStyleBackColor = true;
+            // 
+            // searchOptionSetText
+            // 
+            this.searchOptionSetText.AutoSize = true;
+            this.searchOptionSetText.Location = new System.Drawing.Point(171, 9);
+            this.searchOptionSetText.Name = "searchOptionSetText";
+            this.searchOptionSetText.Size = new System.Drawing.Size(196, 17);
+            this.searchOptionSetText.TabIndex = 9;
+            this.searchOptionSetText.Text = "Search Picklist Text (may be slower)";
+            this.searchOptionSetText.UseVisualStyleBackColor = true;
             // 
             // matchCaseCheckBox
             // 
@@ -226,5 +250,7 @@
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.CheckBox matchCaseCheckBox;
         private System.Windows.Forms.Button btnFind;
+        private System.Windows.Forms.CheckBox searchLookupText;
+        private System.Windows.Forms.CheckBox searchOptionSetText;
     }
 }

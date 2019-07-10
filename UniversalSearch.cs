@@ -41,15 +41,15 @@ namespace MikeFactorial.XTB.Plugins
         /// </summary>
         public override void UpdateConnection(IOrganizationService newService, ConnectionDetail detail, string actionName, object parameter)
         {
-            base.UpdateConnection(newService, detail, actionName, parameter);
             foreach (TabPage tabPage in this.tabControl1.TabPages)
             {
                 foreach (Cinteros.Xrm.CRMWinForm.CRMGridView view in tabPage.Controls)
                 {
-                    view.OrganizationService = detail.ServiceClient;
+                    view.OrganizationService = newService;
                 }
             }
-            EntitiesListViewControl1.Service = detail.ServiceClient;
+            EntitiesListViewControl1.Service = newService;
+            base.UpdateConnection(newService, detail, actionName, parameter);
         }
 
         private void LoadData(List<EntityMetadata> selectedEntities)
@@ -63,6 +63,8 @@ namespace MikeFactorial.XTB.Plugins
                 Work = (worker, args) =>
                 {
                     selectedEntities = selectedEntities.OrderBy(e => e.LogicalName).ToList();
+                    long recordCount = 0;
+                    int entityCount = 0;
                     for (int i = 0; i < selectedEntities.Count; i++)
                     {
                         try
@@ -147,8 +149,40 @@ namespace MikeFactorial.XTB.Plugins
                                         query.ColumnSet.AddColumn(att.LogicalName);
                                         if (att.AttributeType == AttributeTypeCode.Lookup || att.AttributeType == AttributeTypeCode.Owner || att.AttributeType == AttributeTypeCode.Uniqueidentifier || att.AttributeType == AttributeTypeCode.Customer)
                                         {
-                                            fe.AddCondition(att.LogicalName, ConditionOperator.Equal, guidValue);
-                                            conditionAdded = true;
+                                                /*TODO
+                                            if (searchLookupText.Checked && (att.AttributeType == AttributeTypeCode.Lookup || att.AttributeType == AttributeTypeCode.Owner || att.AttributeType == AttributeTypeCode.Customer) && guidValue == Guid.Empty)
+                                            {
+                                                //Here we are going to search for the picklist display value rather than the value
+                                                LookupAttributeMetadata lookup = (LookupAttributeMetadata)att;
+                                                if (lookup..OptionSet != null)
+                                                {
+                                                    foreach (var option in pick.OptionSet.Options)
+                                                    {
+                                                        if (option.Label != null && option.Label.UserLocalizedLabel != null && option.Value != null)
+                                                        {
+                                                            if (!matchCaseCheckBox.Checked)
+                                                            {
+                                                                if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text), RegexOptions.IgnoreCase))
+                                                                {
+                                                                    fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)option.Value.Value);
+                                                                    conditionAdded = true;
+                                                                }
+                                                            }
+                                                            else if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text)))
+                                                            {
+                                                                fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)option.Value.Value);
+                                                                conditionAdded = true;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                fe.AddCondition(att.LogicalName, ConditionOperator.Equal, guidValue);
+                                                conditionAdded = true;
+                                            }
+                                            */
                                         }
                                         else if (att.AttributeType == AttributeTypeCode.BigInt)
                                         {
@@ -157,7 +191,7 @@ namespace MikeFactorial.XTB.Plugins
                                         }
                                         else if (att.AttributeType == AttributeTypeCode.Integer || att.AttributeType.Value == AttributeTypeCode.Picklist || att.AttributeType.Value == AttributeTypeCode.State || att.AttributeType.Value == AttributeTypeCode.Status)
                                         {
-                                            if (att.AttributeType.Value == AttributeTypeCode.Picklist && intValue == long.MinValue)
+                                            if (searchOptionSetText.Checked && (att.AttributeType.Value == AttributeTypeCode.Picklist && intValue == long.MinValue))
                                             {
                                                 //Here we are going to search for the picklist display value rather than the value
                                                 PicklistAttributeMetadata pick = (PicklistAttributeMetadata)att;
@@ -258,10 +292,14 @@ namespace MikeFactorial.XTB.Plugins
                                                 }
                                             }
                                         }
+                                        recordCount += results.Entities.Count;
+                                        entityCount++;
                                         AddTab(results);
                                     }
                                     else
                                     {
+                                        recordCount += results.Entities.Count;
+                                        entityCount++;
                                         AddTab(results);
                                     }
                                 }
@@ -272,6 +310,8 @@ namespace MikeFactorial.XTB.Plugins
                             this.LogError(e.ToString());
                         }
                     }
+                    worker.ReportProgress(0, $"Search Complete. Found {recordCount} records in {entityCount} entities.");
+
                 },
                 ProgressChanged = (args) =>
                 {
@@ -292,9 +332,9 @@ namespace MikeFactorial.XTB.Plugins
 
         private void UpdateDisplayTexts(List<AttributeMetadata> attsToSearch, long intValue, EntityCollection results)
         {
-            foreach (AttributeMetadata att in attsToSearch.Where(att => att.AttributeType != null && (att.AttributeType.Value == AttributeTypeCode.Picklist || att.AttributeType.Value == AttributeTypeCode.DateTime)))
+            if (searchOptionSetText.Checked && intValue == long.MinValue)
             {
-                if (att.AttributeType.Value == AttributeTypeCode.Picklist && intValue == long.MinValue)
+                foreach (AttributeMetadata att in attsToSearch.Where(att => att.AttributeType != null && att.AttributeType.Value == AttributeTypeCode.Picklist))
                 {
                     PicklistAttributeMetadata pick = (PicklistAttributeMetadata)att;
                     if (pick.OptionSet != null)
