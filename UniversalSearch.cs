@@ -65,6 +65,8 @@ namespace MikeFactorial.XTB.Plugins
                     selectedEntities = selectedEntities.OrderBy(e => e.LogicalName).ToList();
                     long recordCount = 0;
                     int entityCount = 0;
+                    List<EntityMetadata> nonSelectedEntities = new List<EntityMetadata>();
+                    Dictionary<Guid, string> matchedLookups = new Dictionary<Guid, string>();
                     for (int i = 0; i < selectedEntities.Count; i++)
                     {
                         try
@@ -86,7 +88,9 @@ namespace MikeFactorial.XTB.Plugins
                             {
                                 return;
                             }
-                            List<AttributeMetadata> attsToSearch = resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.String || meta.AttributeType == AttributeTypeCode.Memo || meta.AttributeType == AttributeTypeCode.Picklist) && meta.IsValidForRead.Value).ToList();
+                            List<AttributeMetadata> attsToSearch = resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.String || meta.AttributeType == AttributeTypeCode.Memo) && meta.IsValidForRead.Value).ToList();
+
+
                             if (worker.CancellationPending)
                             {
                                 return;
@@ -96,6 +100,10 @@ namespace MikeFactorial.XTB.Plugins
                             {
                                 attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Lookup || meta.AttributeType == AttributeTypeCode.Owner || meta.AttributeType == AttributeTypeCode.Uniqueidentifier || meta.AttributeType == AttributeTypeCode.Customer) && meta.IsValidForRead.Value).ToList());
                             }
+                            else if (searchLookupText.Checked)
+                            {
+                                attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Lookup || meta.AttributeType == AttributeTypeCode.Owner || meta.AttributeType == AttributeTypeCode.Customer) && meta.IsValidForRead.Value).ToList());
+                            }
 
                             long intValue;
                             if (long.TryParse(this.searchTextBox.Text, out intValue))
@@ -104,6 +112,10 @@ namespace MikeFactorial.XTB.Plugins
                             }
                             else
                             {
+                                if (searchOptionSetText.Checked)
+                                {
+                                    attsToSearch.AddRange(resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.Picklist) && meta.IsValidForRead.Value));
+                                }
                                 intValue = long.MinValue;
                             }
 
@@ -140,6 +152,17 @@ namespace MikeFactorial.XTB.Plugins
                             }
                             attsToSearch = attsToSearch.OrderBy(a => a.LogicalName).ToList();
                             bool conditionAdded = false;
+                            EntityMetadata relationshipMetadata = null;
+                            if (searchLookupText.Checked)
+                            {
+                                RetrieveEntityRequest request = new RetrieveEntityRequest();
+                                request.EntityFilters = EntityFilters.Relationships;
+                                request.LogicalName = selectedEntity.LogicalName;
+
+                                var relationshipResponse = (RetrieveEntityResponse)this.Service.Execute(request);
+                                relationshipMetadata = relationshipResponse.EntityMetadata;
+                            }
+
                             foreach (AttributeMetadata att in attsToSearch)
                             {
                                 if (att.LogicalName != selectedEntity.PrimaryNameAttribute && att.LogicalName != selectedEntity.PrimaryIdAttribute)
@@ -149,31 +172,44 @@ namespace MikeFactorial.XTB.Plugins
                                         query.ColumnSet.AddColumn(att.LogicalName);
                                         if (att.AttributeType == AttributeTypeCode.Lookup || att.AttributeType == AttributeTypeCode.Owner || att.AttributeType == AttributeTypeCode.Uniqueidentifier || att.AttributeType == AttributeTypeCode.Customer)
                                         {
-                                                /*TODO
                                             if (searchLookupText.Checked && (att.AttributeType == AttributeTypeCode.Lookup || att.AttributeType == AttributeTypeCode.Owner || att.AttributeType == AttributeTypeCode.Customer) && guidValue == Guid.Empty)
                                             {
                                                 //Here we are going to search for the picklist display value rather than the value
                                                 LookupAttributeMetadata lookup = (LookupAttributeMetadata)att;
-                                                if (lookup..OptionSet != null)
+                                                OneToManyRelationshipMetadata relationship = relationshipMetadata.ManyToOneRelationships.FirstOrDefault(r => r.ReferencingAttribute == lookup.LogicalName);
+
+                                                if (relationship != null)
                                                 {
-                                                    foreach (var option in pick.OptionSet.Options)
+                                                    QueryExpression lookupQuery = new QueryExpression(relationship.ReferencedEntity);
+                                                    EntityMetadata relatedEntityMetadata = selectedEntities.FirstOrDefault(m => m.LogicalName == relationship.ReferencedEntity);
+                                                    if (relatedEntityMetadata == null)
                                                     {
-                                                        if (option.Label != null && option.Label.UserLocalizedLabel != null && option.Value != null)
+                                                        relatedEntityMetadata = nonSelectedEntities.FirstOrDefault(m => m.LogicalName == relationship.ReferencedEntity);
+                                                        if (relatedEntityMetadata == null)
                                                         {
-                                                            if (!matchCaseCheckBox.Checked)
-                                                            {
-                                                                if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text), RegexOptions.IgnoreCase))
-                                                                {
-                                                                    fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)option.Value.Value);
-                                                                    conditionAdded = true;
-                                                                }
-                                                            }
-                                                            else if (Regex.IsMatch(option.Label.UserLocalizedLabel.Label, WildCardToRegular(this.searchTextBox.Text)))
-                                                            {
-                                                                fe.AddCondition(att.LogicalName, ConditionOperator.Equal, (Int32)option.Value.Value);
-                                                                conditionAdded = true;
-                                                            }
+                                                            RetrieveEntityRequest request = new RetrieveEntityRequest();
+                                                            request.EntityFilters = EntityFilters.Entity;
+                                                            request.LogicalName = relationship.ReferencedEntity;
+
+                                                            var relationshipResponse = (RetrieveEntityResponse)this.Service.Execute(request);
+                                                            nonSelectedEntities.Add(relationshipResponse.EntityMetadata);
+                                                            relatedEntityMetadata = nonSelectedEntities.FirstOrDefault(m => m.LogicalName == relationship.ReferencedEntity);
                                                         }
+                                                    }
+                                                    FilterExpression filter = new FilterExpression();
+                                                    filter.AddCondition(relatedEntityMetadata.PrimaryNameAttribute, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
+                                                    lookupQuery.Criteria.AddFilter(filter);
+                                                    lookupQuery.ColumnSet = new ColumnSet(new string[] { relatedEntityMetadata.PrimaryIdAttribute, relatedEntityMetadata.PrimaryNameAttribute });
+
+                                                    EntityCollection parentEntities = this.Service.RetrieveMultiple(lookupQuery);
+                                                    foreach (var parentEntity in parentEntities.Entities)
+                                                    {
+                                                        fe.AddCondition(lookup.LogicalName, ConditionOperator.Equal, parentEntity[relatedEntityMetadata.PrimaryIdAttribute]);
+                                                        if(!matchedLookups.ContainsKey((Guid)parentEntity[relatedEntityMetadata.PrimaryIdAttribute]))
+                                                        {
+                                                            matchedLookups.Add((Guid)parentEntity[relatedEntityMetadata.PrimaryIdAttribute], (string)parentEntity[relatedEntityMetadata.PrimaryNameAttribute]);
+                                                        }
+                                                        conditionAdded = true;
                                                     }
                                                 }
                                             }
@@ -182,7 +218,6 @@ namespace MikeFactorial.XTB.Plugins
                                                 fe.AddCondition(att.LogicalName, ConditionOperator.Equal, guidValue);
                                                 conditionAdded = true;
                                             }
-                                            */
                                         }
                                         else if (att.AttributeType == AttributeTypeCode.BigInt)
                                         {
@@ -262,7 +297,7 @@ namespace MikeFactorial.XTB.Plugins
                                 if (results.Entities != null && results.Entities.Count > 0)
                                 {
                                     //Here we are going to replace the integer value with the display value for the picklist we returned in the results and convert UTC date/time to local for the results to display correctly..
-                                    UpdateDisplayTexts(attsToSearch, intValue, results);
+                                    UpdateDisplayTexts(attsToSearch, intValue, matchedLookups, guidValue, results);
 
                                     if (this.matchCaseCheckBox.Checked || dateTimeValue != DateTime.MinValue)
                                     {
@@ -308,6 +343,7 @@ namespace MikeFactorial.XTB.Plugins
                         catch (Exception e)
                         {
                             this.LogError(e.ToString());
+                            worker.ReportProgress(0, $"Search Completed with Errors. Error Message: " + e.Message);
                         }
                     }
                     worker.ReportProgress(0, $"Search Complete. Found {recordCount} records in {entityCount} entities.");
@@ -330,7 +366,7 @@ namespace MikeFactorial.XTB.Plugins
             });
         }
 
-        private void UpdateDisplayTexts(List<AttributeMetadata> attsToSearch, long intValue, EntityCollection results)
+        private void UpdateDisplayTexts(List<AttributeMetadata> attsToSearch, long intValue, Dictionary<Guid, string> matchedLookups, Guid guidValue, EntityCollection results)
         {
             if (searchOptionSetText.Checked && intValue == long.MinValue)
             {
@@ -367,6 +403,26 @@ namespace MikeFactorial.XTB.Plugins
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            if (searchLookupText.Checked && guidValue == Guid.Empty)
+            {
+                var lookupAtts = attsToSearch.Where(att => att.AttributeType != null && (att.AttributeType.Value == AttributeTypeCode.Lookup || att.AttributeType.Value == AttributeTypeCode.Customer || att.AttributeType.Value == AttributeTypeCode.Owner)).ToList();
+                foreach (AttributeMetadata att in lookupAtts)
+                {
+                    for (int j = 0; j < results.Entities.Count; j++)
+                    {
+                        var iEnum = matchedLookups.GetEnumerator();
+                        while (iEnum.MoveNext())
+                        {
+                            if (results.Entities[j].Contains(att.LogicalName) && ((EntityReference)results.Entities[j][att.LogicalName]).Id == iEnum.Current.Key)
+                            {
+                                results.Entities[j][att.LogicalName] = iEnum.Current.Value;
+                            }
+
                         }
                     }
                 }
