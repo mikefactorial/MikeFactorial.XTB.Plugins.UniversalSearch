@@ -154,7 +154,7 @@
             this.searchLookupText.Name = "searchLookupText";
             this.searchLookupText.Size = new System.Drawing.Size(199, 17);
             this.searchLookupText.TabIndex = 10;
-            this.searchLookupText.Text = "Search Lookup Text (may be slower)";
+            this.searchLookupText.Text = "Search Lookup Text (slowest)";
             this.searchLookupText.UseVisualStyleBackColor = true;
             // 
             // searchOptionSetText
@@ -164,7 +164,7 @@
             this.searchOptionSetText.Name = "searchOptionSetText";
             this.searchOptionSetText.Size = new System.Drawing.Size(196, 17);
             this.searchOptionSetText.TabIndex = 9;
-            this.searchOptionSetText.Text = "Search Picklist Text (may be slower)";
+            this.searchOptionSetText.Text = "Search Picklist Text (slower)";
             this.searchOptionSetText.UseVisualStyleBackColor = true;
             // 
             // matchCaseCheckBox
@@ -174,7 +174,7 @@
             this.matchCaseCheckBox.Name = "matchCaseCheckBox";
             this.matchCaseCheckBox.Size = new System.Drawing.Size(159, 17);
             this.matchCaseCheckBox.TabIndex = 8;
-            this.matchCaseCheckBox.Text = "Match Case (may be slower)";
+            this.matchCaseCheckBox.Text = "Match Case (slow)";
             this.matchCaseCheckBox.UseVisualStyleBackColor = true;
             // 
             // btnFind

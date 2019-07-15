@@ -199,7 +199,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>IF NOT EXIST merged mkdir merged
-"$(SolutionDir)packages\ILMerge.3.0.18\tools\net452\ILMerge.exe" /targetplatform:v4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.1" /lib:"C:\Windows\Microsoft.Net\Framework64\v4.0.30319" /log:ilmerge.log /out:"$(TargetDir)Merged\$(TargetFileName)" "$(TargetFileName)" "$(TargetDir)Cinteros.Xrm.CRMWinForm.dll" "$(TargetDir)Futurez.XrmToolbox.Controls.dll"
+"$(SolutionDir)packages\ILMerge.3.0.29\tools\net452\ILMerge.exe" /targetplatform:v4,"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.1" /lib:"C:\Windows\Microsoft.Net\Framework64\v4.0.30319" /log:ilmerge.log /out:"$(TargetDir)Merged\$(TargetFileName)" "$(TargetFileName)" "$(TargetDir)Cinteros.Xrm.CRMWinForm.dll" "$(TargetDir)Futurez.XrmToolbox.Controls.dll"
 
 IF NOT EXIST Plugins mkdir Plugins
 xcopy "$(TargetDir)merged\$(TargetFileName)" "$(TargetDir)Plugins\" /Y
