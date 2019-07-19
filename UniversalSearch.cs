@@ -137,14 +137,11 @@ namespace MikeFactorial.XTB.Plugins
                             AttributeMetadata primaryNameAttribute = resp.EntityMetadata.Attributes.FirstOrDefault(a => a.LogicalName == selectedEntity.PrimaryNameAttribute);
                             if (primaryNameAttribute != null)
                             {
-                                if (primaryNameAttribute.IsValidForRead.Value && primaryNameAttribute.IsSearchable.Value)
+                                if (primaryNameAttribute.IsValidForRead.Value)
                                 {
                                     query.ColumnSet.AddColumn(selectedEntity.PrimaryNameAttribute);
                                 }
-                                if (primaryNameAttribute.IsSearchable.Value)
-                                {
-                                    fe.AddCondition(selectedEntity.PrimaryNameAttribute, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
-                                }
+                                fe.AddCondition(selectedEntity.PrimaryNameAttribute, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
                             }
                             if (guidValue != Guid.Empty)
                             {
