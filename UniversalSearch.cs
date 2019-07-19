@@ -435,42 +435,45 @@ namespace MikeFactorial.XTB.Plugins
         }
         private void AddTab(EntityCollection collection)
         {
-            if (this.tabControl1.InvokeRequired)
+            if (collection != null && collection.Entities != null)
             {
-                AddTabCallback d = new AddTabCallback(AddTab);
-                this.Invoke(d, new object[] { collection });
-            }
-            else
-            {
-                if (collection.Entities.Count > 0)
+                if (this.tabControl1.InvokeRequired)
                 {
-                    Cinteros.Xrm.CRMWinForm.CRMGridView gridData = new Cinteros.Xrm.CRMWinForm.CRMGridView();
-                    gridData.ShowLocalTimes = false;
-                    gridData.AllowUserToAddRows = false;
-                    gridData.AllowUserToDeleteRows = false;
-                    gridData.AllowUserToOrderColumns = true;
-                    gridData.AllowUserToResizeRows = false;
-                    gridData.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-                    gridData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-                    gridData.Dock = System.Windows.Forms.DockStyle.Fill;
-                    gridData.EntityReferenceClickable = true;
-                    gridData.FilterColumns = "";
-                    gridData.Location = new System.Drawing.Point(8, 38);
-                    gridData.Margin = new System.Windows.Forms.Padding(8, 7, 8, 7);
-                    gridData.Name = "gridData";
-                    gridData.ReadOnly = true;
-                    gridData.RowHeadersVisible = false;
-                    gridData.ShowIndexColumn = false;
-                    gridData.Size = new System.Drawing.Size(1587, 1090);
-                    gridData.TabIndex = 0;
-                    gridData.RecordClick += new Cinteros.Xrm.CRMWinForm.CRMRecordEventHandler(gridData_RecordClick);
-                    gridData.RecordDoubleClick += new Cinteros.Xrm.CRMWinForm.CRMRecordEventHandler(this.gridData_RecordDoubleClick);
-                    gridData.DataSource = collection;
-                    gridData.DataBindingComplete += GridData_DataBindingComplete;
-                    TabPage tabPage = new TabPage(collection.EntityName);
-                    tabPage.Controls.Add(gridData);
+                    AddTabCallback d = new AddTabCallback(AddTab);
+                    this.Invoke(d, new object[] { collection });
+                }
+                else
+                {
+                    if (collection.Entities.Count > 0)
+                    {
+                        Cinteros.Xrm.CRMWinForm.CRMGridView gridData = new Cinteros.Xrm.CRMWinForm.CRMGridView();
+                        gridData.ShowLocalTimes = false;
+                        gridData.AllowUserToAddRows = false;
+                        gridData.AllowUserToDeleteRows = false;
+                        gridData.AllowUserToOrderColumns = true;
+                        gridData.AllowUserToResizeRows = false;
+                        gridData.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+                        gridData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+                        gridData.Dock = System.Windows.Forms.DockStyle.Fill;
+                        gridData.EntityReferenceClickable = true;
+                        gridData.FilterColumns = "";
+                        gridData.Location = new System.Drawing.Point(8, 38);
+                        gridData.Margin = new System.Windows.Forms.Padding(8, 7, 8, 7);
+                        gridData.Name = "gridData";
+                        gridData.ReadOnly = true;
+                        gridData.RowHeadersVisible = false;
+                        gridData.ShowIndexColumn = false;
+                        gridData.Size = new System.Drawing.Size(1587, 1090);
+                        gridData.TabIndex = 0;
+                        gridData.RecordClick += new Cinteros.Xrm.CRMWinForm.CRMRecordEventHandler(gridData_RecordClick);
+                        gridData.RecordDoubleClick += new Cinteros.Xrm.CRMWinForm.CRMRecordEventHandler(this.gridData_RecordDoubleClick);
+                        gridData.DataSource = collection;
+                        gridData.DataBindingComplete += GridData_DataBindingComplete;
+                        TabPage tabPage = new TabPage(collection.EntityName);
+                        tabPage.Controls.Add(gridData);
 
-                    this.tabControl1.TabPages.Add(tabPage);
+                        this.tabControl1.TabPages.Add(tabPage);
+                    }
                 }
             }
         }
