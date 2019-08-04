@@ -563,6 +563,14 @@ namespace MikeFactorial.XTB.Plugins
             }
         }
 
+        private void SearchTextBox_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                btnFind.PerformClick();
+            }
+        }
+
         public void OnIncomingMessage(MessageBusEventArgs message)
         {
             MessageBox.Show("Simple Data Viewer cannot yet handle calls from other tools.");

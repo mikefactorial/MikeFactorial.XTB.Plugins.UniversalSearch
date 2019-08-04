@@ -205,6 +205,7 @@
             this.searchTextBox.Name = "searchTextBox";
             this.searchTextBox.Size = new System.Drawing.Size(734, 20);
             this.searchTextBox.TabIndex = 5;
+            this.searchTextBox.KeyUp += SearchTextBox_KeyUp;
             this.searchTextToolTip.SetToolTip(this.searchTextBox, "Enter the value to search. Use wildcard (*) to perform a wildcard search.");
             // 
             // searchTextToolTip
