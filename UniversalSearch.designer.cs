@@ -32,7 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UniversalSearch));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.EntitiesListViewControl1 = new Futurez.XrmToolBox.Controls.EntitiesListControl();
+            this.EntitiesListViewControl1 = new xrmtb.XrmToolBox.Controls.EntitiesListControl();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -88,15 +88,12 @@
             // 
             this.EntitiesListViewControl1.AutoLoadData = true;
             this.EntitiesListViewControl1.Checkboxes = true;
-            this.EntitiesListViewControl1.ColumnDisplayMode = Futurez.XrmToolBox.Controls.ListViewColumnDisplayMode.Compact;
             this.EntitiesListViewControl1.DisplayToolbar = true;
             this.EntitiesListViewControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.EntitiesListViewControl1.EntityTypes = Futurez.XrmToolBox.Controls.EnumEntityTypes.BothCustomAndSystem;
-            this.EntitiesListViewControl1.GroupByType = false;
+            this.EntitiesListViewControl1.EntityTypes = xrmtb.XrmToolBox.Controls.EnumEntityTypes.BothCustomAndSystem;
             this.EntitiesListViewControl1.Location = new System.Drawing.Point(3, 16);
             this.EntitiesListViewControl1.Margin = new System.Windows.Forms.Padding(8, 7, 8, 7);
             this.EntitiesListViewControl1.Name = "EntitiesListViewControl1";
-            this.EntitiesListViewControl1.ParentBaseControl = this;
             this.EntitiesListViewControl1.RetrieveAsIfPublished = true;
             this.EntitiesListViewControl1.Service = null;
             this.EntitiesListViewControl1.Size = new System.Drawing.Size(278, 518);
@@ -240,7 +237,7 @@
 
         #endregion
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private Futurez.XrmToolBox.Controls.EntitiesListControl EntitiesListViewControl1;
+        private xrmtb.XrmToolBox.Controls.EntitiesListControl EntitiesListViewControl1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.GroupBox groupBox3;

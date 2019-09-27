@@ -1,4 +1,4 @@
-﻿using Futurez.XrmToolBox.Controls;
+﻿using xrmtb.XrmToolBox.Controls;
 using McTools.Xrm.Connection;
 using Microsoft.VisualBasic.CompilerServices;
 using Microsoft.Xrm.Sdk;
@@ -30,8 +30,8 @@ namespace MikeFactorial.XTB.Plugins
         public UniversalSearch()
         {
             InitializeComponent();
-            EntitiesListViewControl1.Initialize(this, Service);
-            EntitiesListViewControl1.SortEntitiesList(0, SortOrder.Ascending);
+            //EntitiesListViewControl1.Initialize(this, Service);
+            EntitiesListViewControl1.SortList(0, SortOrder.Ascending);
         }
 
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
@@ -43,7 +43,7 @@ namespace MikeFactorial.XTB.Plugins
         {
             foreach (TabPage tabPage in this.tabControl1.TabPages)
             {
-                foreach (Cinteros.Xrm.CRMWinForm.CRMGridView view in tabPage.Controls)
+                foreach (xrmtb.XrmToolBox.Controls.CRMGridView view in tabPage.Controls)
                 {
                     view.OrganizationService = newService;
                 }
@@ -443,7 +443,7 @@ namespace MikeFactorial.XTB.Plugins
                 {
                     if (collection.Entities.Count > 0)
                     {
-                        Cinteros.Xrm.CRMWinForm.CRMGridView gridData = new Cinteros.Xrm.CRMWinForm.CRMGridView();
+                        xrmtb.XrmToolBox.Controls.CRMGridView gridData = new xrmtb.XrmToolBox.Controls.CRMGridView();
                         gridData.ShowLocalTimes = false;
                         gridData.AllowUserToAddRows = false;
                         gridData.AllowUserToDeleteRows = false;
@@ -462,8 +462,8 @@ namespace MikeFactorial.XTB.Plugins
                         gridData.ShowIndexColumn = false;
                         gridData.Size = new System.Drawing.Size(1587, 1090);
                         gridData.TabIndex = 0;
-                        gridData.RecordClick += new Cinteros.Xrm.CRMWinForm.CRMRecordEventHandler(gridData_RecordClick);
-                        gridData.RecordDoubleClick += new Cinteros.Xrm.CRMWinForm.CRMRecordEventHandler(this.gridData_RecordDoubleClick);
+                        gridData.RecordClick += new xrmtb.XrmToolBox.Controls.CRMRecordEventHandler(gridData_RecordClick);
+                        gridData.RecordDoubleClick += new xrmtb.XrmToolBox.Controls.CRMRecordEventHandler(this.gridData_RecordDoubleClick);
                         gridData.DataSource = collection;
                         gridData.DataBindingComplete += GridData_DataBindingComplete;
                         TabPage tabPage = new TabPage(collection.EntityName);
@@ -477,7 +477,7 @@ namespace MikeFactorial.XTB.Plugins
 
         private void GridData_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
-            foreach (DataGridViewRow row in ((Cinteros.Xrm.CRMWinForm.CRMGridView)sender).Rows)
+            foreach (DataGridViewRow row in ((xrmtb.XrmToolBox.Controls.CRMGridView)sender).Rows)
             {
                 foreach (DataGridViewCell cell in row.Cells)
                 {
@@ -550,12 +550,12 @@ namespace MikeFactorial.XTB.Plugins
             }
         }
 
-        private void gridData_RecordDoubleClick(object sender, Cinteros.Xrm.CRMWinForm.CRMRecordEventArgs e)
+        private void gridData_RecordDoubleClick(object sender, xrmtb.XrmToolBox.Controls.CRMRecordEventArgs e)
         {
             OpenEntityReference(e.Entity.ToEntityReference());
         }
 
-        private void gridData_RecordClick(object sender, Cinteros.Xrm.CRMWinForm.CRMRecordEventArgs e)
+        private void gridData_RecordClick(object sender, xrmtb.XrmToolBox.Controls.CRMRecordEventArgs e)
         {
             if (e.Value is EntityReference entref)
             {
