@@ -172,6 +172,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MetadataSearchResult.cs" />
     <Compile Include="UniversalSearchTool.cs" />
     <Compile Include="UniversalSearch.cs">
       <SubType>UserControl</SubType>

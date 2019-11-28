@@ -117,6 +117,64 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="EntitiesListView.ListViewColDefs" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAF94cm10Yi5Ycm1Ub29sQm94LkNvbnRyb2xzLCBWZXJzaW9uPTEu
+        MjAxOS43LjYsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49MzRkZWYyYzQwNTAwYzYyYwUB
+        AAAAK3hybXRiLlhybVRvb2xCb3guQ29udHJvbHMuTGlzdFZpZXdDb2x1bW5EZWYGAAAAFTxOYW1lPmtf
+        X0JhY2tpbmdGaWVsZBw8RGlzcGxheU5hbWU+a19fQmFja2luZ0ZpZWxkFjxPcmRlcj5rX19CYWNraW5n
+        RmllbGQePElzR3JvdXBDb2x1bW4+a19fQmFja2luZ0ZpZWxkHzxJc0ZpbHRlckNvbHVtbj5rX19CYWNr
+        aW5nRmllbGQWPFdpZHRoPmtfX0JhY2tpbmdGaWVsZAEBAAAAAAgBAQgCAAAABgMAAAALRGlzcGxheU5h
+        bWUGBAAAAAxEaXNwbGF5IE5hbWUBAAAAAAD6AAAACw==
+</value>
+  </data>
+  <data name="EntitiesListView.ListViewColDefs1" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAF94cm10Yi5Ycm1Ub29sQm94LkNvbnRyb2xzLCBWZXJzaW9uPTEu
+        MjAxOS43LjYsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49MzRkZWYyYzQwNTAwYzYyYwUB
+        AAAAK3hybXRiLlhybVRvb2xCb3guQ29udHJvbHMuTGlzdFZpZXdDb2x1bW5EZWYGAAAAFTxOYW1lPmtf
+        X0JhY2tpbmdGaWVsZBw8RGlzcGxheU5hbWU+a19fQmFja2luZ0ZpZWxkFjxPcmRlcj5rX19CYWNraW5n
+        RmllbGQePElzR3JvdXBDb2x1bW4+a19fQmFja2luZ0ZpZWxkHzxJc0ZpbHRlckNvbHVtbj5rX19CYWNr
+        aW5nRmllbGQWPFdpZHRoPmtfX0JhY2tpbmdGaWVsZAEBAAAAAAgBAQgCAAAABgMAAAALTG9naWNhbE5h
+        bWUGBAAAAAxMb2dpY2FsIE5hbWUCAAAAAAFkAAAACw==
+</value>
+  </data>
+  <data name="EntitiesListView.ListViewColDefs2" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAF94cm10Yi5Ycm1Ub29sQm94LkNvbnRyb2xzLCBWZXJzaW9uPTEu
+        MjAxOS43LjYsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49MzRkZWYyYzQwNTAwYzYyYwUB
+        AAAAK3hybXRiLlhybVRvb2xCb3guQ29udHJvbHMuTGlzdFZpZXdDb2x1bW5EZWYGAAAAFTxOYW1lPmtf
+        X0JhY2tpbmdGaWVsZBw8RGlzcGxheU5hbWU+a19fQmFja2luZ0ZpZWxkFjxPcmRlcj5rX19CYWNraW5n
+        RmllbGQePElzR3JvdXBDb2x1bW4+a19fQmFja2luZ0ZpZWxkHzxJc0ZpbHRlckNvbHVtbj5rX19CYWNr
+        aW5nRmllbGQWPFdpZHRoPmtfX0JhY2tpbmdGaWVsZAEBAAAAAAgBAQgCAAAABgMAAAAKU2NoZW1hTmFt
+        ZQYEAAAAC1NjaGVtYSBOYW1lAAAAAAAAlgAAAAs=
+</value>
+  </data>
+  <data name="EntitiesListView.ListViewColDefs3" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAF94cm10Yi5Ycm1Ub29sQm94LkNvbnRyb2xzLCBWZXJzaW9uPTEu
+        MjAxOS43LjYsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49MzRkZWYyYzQwNTAwYzYyYwUB
+        AAAAK3hybXRiLlhybVRvb2xCb3guQ29udHJvbHMuTGlzdFZpZXdDb2x1bW5EZWYGAAAAFTxOYW1lPmtf
+        X0JhY2tpbmdGaWVsZBw8RGlzcGxheU5hbWU+a19fQmFja2luZ0ZpZWxkFjxPcmRlcj5rX19CYWNraW5n
+        RmllbGQePElzR3JvdXBDb2x1bW4+a19fQmFja2luZ0ZpZWxkHzxJc0ZpbHRlckNvbHVtbj5rX19CYWNr
+        aW5nRmllbGQWPFdpZHRoPmtfX0JhY2tpbmdGaWVsZAEBAAAAAAgBAQgCAAAABgMAAAAJSXNNYW5hZ2Vk
+        BgQAAAANTWFuYWdlZCBTdGF0ZQQAAAABAGQAAAAL
+</value>
+  </data>
+  <data name="EntitiesListView.ListViewColDefs4" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAF94cm10Yi5Ycm1Ub29sQm94LkNvbnRyb2xzLCBWZXJzaW9uPTEu
+        MjAxOS43LjYsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49MzRkZWYyYzQwNTAwYzYyYwUB
+        AAAAK3hybXRiLlhybVRvb2xCb3guQ29udHJvbHMuTGlzdFZpZXdDb2x1bW5EZWYGAAAAFTxOYW1lPmtf
+        X0JhY2tpbmdGaWVsZBw8RGlzcGxheU5hbWU+a19fQmFja2luZ0ZpZWxkFjxPcmRlcj5rX19CYWNraW5n
+        RmllbGQePElzR3JvdXBDb2x1bW4+a19fQmFja2luZ0ZpZWxkHzxJc0ZpbHRlckNvbHVtbj5rX19CYWNr
+        aW5nRmllbGQWPFdpZHRoPmtfX0JhY2tpbmdGaWVsZAEBAAAAAAgBAQgCAAAABgMAAAALRGVzY3JpcHRp
+        b24JAwAAAAMAAAAAAPoAAAAL
+</value>
+  </data>
+  <metadata name="searchTextToolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.PluginIcon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -714,10 +772,4 @@
         TkSuQmCC
 </value>
   </data>
-  <metadata name="searchTextToolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <metadata name="searchTextToolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
 </root>

@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Args;
 using XrmToolBox.Extensibility.Interfaces;
+using System.Reflection;
 
 namespace MikeFactorial.XTB.Plugins
 {
@@ -31,11 +32,12 @@ namespace MikeFactorial.XTB.Plugins
         {
             InitializeComponent();
             //EntitiesListViewControl1.Initialize(this, Service);
-            EntitiesListViewControl1.SortList(0, SortOrder.Ascending);
+            EntitiesListView.SortList(0, SortOrder.Ascending);
         }
 
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
         delegate void AddTabCallback(EntityCollection collection);
+        delegate void AddMetadataTabCallback(string entityName, List<MetadataSearchResult> results);
         /// <summary>
         /// This event occurs when the connection has been updated in XrmToolBox
         /// </summary>
@@ -48,8 +50,179 @@ namespace MikeFactorial.XTB.Plugins
                     view.OrganizationService = newService;
                 }
             }
-            EntitiesListViewControl1.Service = newService;
+            EntitiesListView.Service = newService;
             base.UpdateConnection(newService, detail, actionName, parameter);
+        }
+
+        private void LoadMetadata(List<EntityMetadata> selectedEntities)
+        {
+            this.tabControl1.TabPages.Clear();
+            WorkAsync(new WorkAsyncInfo
+            {
+                IsCancelable = true,
+                Message = "Searching...",
+                AsyncArgument = selectedEntities,
+                Work = (worker, args) =>
+                {
+                    selectedEntities = selectedEntities.OrderBy(e => e.LogicalName).ToList();
+                    long recordCount = 0;
+                    int entityCount = 0;
+                    List<EntityMetadata> nonSelectedEntities = new List<EntityMetadata>();
+                    for (int i = 0; i < selectedEntities.Count; i++)
+                    {
+                        try
+                        {
+                            string textToSearch = searchTextBox.Text;
+                            EntityMetadata selectedEntity = selectedEntities[i];
+                            double percentage = (double)(i + 1) / (double)selectedEntities.Count;
+                            percentage = percentage * (double)100;
+
+                            List<AttributeMetadata> attsToSearch = null;
+                            worker.ReportProgress(Convert.ToInt32(percentage), $"Searching {selectedEntity.LogicalName} metadata.");
+                            if (searchAttributes.Checked)
+                            {
+                                // Retrieve the attribute metadata
+                                var req = new RetrieveEntityRequest()
+                                {
+                                    LogicalName = selectedEntity.LogicalName,
+                                    EntityFilters = EntityFilters.Attributes,
+                                    RetrieveAsIfPublished = true
+                                };
+                                var resp = (RetrieveEntityResponse)this.Service.Execute(req);
+                                if (worker.CancellationPending)
+                                {
+                                    return;
+                                }
+                                attsToSearch = resp.EntityMetadata.Attributes.Where(meta => (meta.AttributeType == AttributeTypeCode.String || meta.AttributeType == AttributeTypeCode.Memo) && meta.IsValidForRead.Value).ToList();
+                            }
+                            if (worker.CancellationPending)
+                            {
+                                return;
+                            }
+                            Guid guidValue;
+                            if (Guid.TryParse(this.searchTextBox.Text, out guidValue))
+                            {
+                                textToSearch = guidValue.ToString();
+                            }
+
+
+                            EntityMetadata relationshipMetadata = null;
+                            if (attsToSearch != null)
+                            {
+                                attsToSearch = attsToSearch.OrderBy(a => a.LogicalName).ToList();
+                            }
+                            if (searchRelationships.Checked)
+                            {
+                                RetrieveEntityRequest request = new RetrieveEntityRequest();
+                                request.EntityFilters = EntityFilters.Relationships;
+                                request.LogicalName = selectedEntity.LogicalName;
+
+                                var relationshipResponse = (RetrieveEntityResponse)this.Service.Execute(request);
+                                relationshipMetadata = relationshipResponse.EntityMetadata;
+                            }
+
+                            if (worker.CancellationPending)
+                            {
+                                return;
+                            }
+
+
+                            List<MetadataSearchResult> results = new List<MetadataSearchResult>();
+
+                            this.searchMetadataObject(selectedEntity.LogicalName, selectedEntity, textToSearch, ref results);
+                            if (attsToSearch != null)
+                            {
+                                this.searchMetadataObject(selectedEntity.LogicalName, attsToSearch, textToSearch, ref results);
+                            }
+                            if (relationshipMetadata != null)
+                            {
+                                this.searchMetadataObject(selectedEntity.LogicalName, relationshipMetadata, textToSearch, ref results);
+                            }
+
+                            recordCount += results.Count;
+
+                            AddMetadataResultTab(selectedEntity.LogicalName, results);
+
+                            entityCount++;
+                        }
+                        catch (Exception e)
+                        {
+                            this.LogError(e.ToString());
+                            worker.ReportProgress(0, $"Search Completed with Errors. Error Message: " + e.Message);
+                        }
+                    }
+                    worker.ReportProgress(0, $"Search Complete. Found {recordCount} records in {entityCount} entities.");
+
+                },
+                ProgressChanged = (args) =>
+                {
+                    SetWorkingMessage(args.UserState?.ToString());
+                    SendMessageToStatusBar(this, new StatusBarMessageEventArgs(args.ProgressPercentage, args.UserState.ToString().Replace("\r\n", " ")));
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    this.btnFindMetadata.Text = "Search Metadata";
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show(args.Error.Message, "Oh crap", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+            });
+        }
+
+        private void searchMetadataObject(string entityName, object searchObject, string searchText, ref List<MetadataSearchResult> results)
+        {
+            if (searchObject == null) return;
+            Type objType = searchObject.GetType();
+            PropertyInfo[] properties = objType.GetProperties();
+            foreach (PropertyInfo property in properties)
+            {
+                object propValue = property.GetValue(searchObject, null);
+                var elems = propValue as System.Collections.IList;
+                if (elems != null)
+                {
+                    foreach (var item in elems)
+                    {
+                        searchMetadataObject(entityName, item, searchText, ref results);
+                    }
+                }
+                else
+                {
+                    // This will not cut-off System.Collections because of the first check
+                    if (property.PropertyType.Assembly == objType.Assembly)
+                    {
+                        searchMetadataObject(entityName, propValue, searchText, ref results);
+                    }
+                    else
+                    {
+                        if (!matchCaseCheckBox.Checked)
+                        {
+                            if (Regex.IsMatch(property.Name, WildCardToRegular(searchText), RegexOptions.IgnoreCase) || (!string.IsNullOrEmpty(propValue?.ToString()) && Regex.IsMatch(propValue?.ToString(), WildCardToRegular(searchText), RegexOptions.IgnoreCase)))
+                            {
+                                results.Add(new MetadataSearchResult()
+                                { 
+                                     EntityName = entityName,
+                                     Property = property.Name,
+                                     Value = propValue?.ToString(),
+                                     Type = property.MemberType.ToString()
+                                });
+                            }
+                        }
+                        else if (Regex.IsMatch(property.Name, WildCardToRegular(searchText)) || (!string.IsNullOrEmpty(propValue?.ToString()) && Regex.IsMatch(propValue?.ToString(), WildCardToRegular(searchText))))
+                        {
+                            results.Add(new MetadataSearchResult()
+                            {
+                                EntityName = entityName,
+                                Property = property.Name,
+                                Value = propValue?.ToString(),
+                                Type = property.MemberType.ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return;
         }
 
         private void LoadData(List<EntityMetadata> selectedEntities)
@@ -326,13 +499,13 @@ namespace MikeFactorial.XTB.Plugins
                                         }
                                         recordCount += results.Entities.Count;
                                         entityCount++;
-                                        AddTab(results);
+                                        AddRecordResultTab(results);
                                     }
                                     else
                                     {
                                         recordCount += results.Entities.Count;
                                         entityCount++;
-                                        AddTab(results);
+                                        AddRecordResultTab(results);
                                     }
                                 }
                             }
@@ -353,7 +526,7 @@ namespace MikeFactorial.XTB.Plugins
                 },
                 PostWorkCallBack = (args) =>
                 {
-                    this.btnFind.Text = "Search";
+                    this.btnFind.Text = "Search Records";
                     if (args.Error != null)
                     {
                         MessageBox.Show(args.Error.Message, "Oh crap", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -430,13 +603,13 @@ namespace MikeFactorial.XTB.Plugins
         {
             return "^" + Regex.Escape(value).Replace("\\*", ".*") + "$";
         }
-        private void AddTab(EntityCollection collection)
+        private void AddRecordResultTab(EntityCollection collection)
         {
             if (collection != null && collection.Entities != null)
             {
                 if (this.tabControl1.InvokeRequired)
                 {
-                    AddTabCallback d = new AddTabCallback(AddTab);
+                    AddTabCallback d = new AddTabCallback(AddRecordResultTab);
                     this.Invoke(d, new object[] { collection });
                 }
                 else
@@ -471,6 +644,45 @@ namespace MikeFactorial.XTB.Plugins
 
                         this.tabControl1.TabPages.Add(tabPage);
                     }
+                }
+            }
+        }
+
+        private void AddMetadataResultTab(string entityName, List<MetadataSearchResult> results)
+        {
+            if (results.Count > 0)
+            {
+                if (this.tabControl1.InvokeRequired)
+                {
+                    AddMetadataTabCallback d = new AddMetadataTabCallback(AddMetadataResultTab);
+                    this.Invoke(d, new object[] { entityName, results });
+                }
+                else
+                {
+                    DataGridView gridData = new DataGridView();
+                    gridData.AllowUserToAddRows = false;
+                    gridData.AllowUserToDeleteRows = false;
+                    gridData.AllowUserToOrderColumns = true;
+                    gridData.AllowUserToResizeRows = false;
+                    gridData.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+                    gridData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+                    gridData.Dock = System.Windows.Forms.DockStyle.Fill;
+                    gridData.Location = new System.Drawing.Point(8, 38);
+                    gridData.Margin = new System.Windows.Forms.Padding(8, 7, 8, 7);
+                    gridData.Name = "gridData";
+                    gridData.ReadOnly = true;
+                    gridData.RowHeadersVisible = false;
+                    gridData.Size = new System.Drawing.Size(1587, 1090);
+                    gridData.TabIndex = 0;
+                    /*
+                    gridData.RecordClick += new xrmtb.XrmToolBox.Controls.CRMRecordEventHandler(gridData_RecordClick);
+                    gridData.RecordDoubleClick += new xrmtb.XrmToolBox.Controls.CRMRecordEventHandler(this.gridData_RecordDoubleClick);
+                    */
+                    gridData.DataSource = results;
+                    //gridData.DataBindingComplete += GridData_DataBindingComplete;
+                    TabPage tabPage = new TabPage(entityName);
+                    tabPage.Controls.Add(gridData);
+                    this.tabControl1.TabPages.Add(tabPage);
                 }
             }
         }
@@ -567,32 +779,69 @@ namespace MikeFactorial.XTB.Plugins
         {
             if (e.KeyCode == Keys.Enter)
             {
-                btnFind.PerformClick();
+                if (recordSearchRadio.Checked)
+                {
+                    btnFind.PerformClick();
+                }
+                else
+                {
+                    btnFindMetadata.PerformClick();
+                }
             }
         }
 
         public void OnIncomingMessage(MessageBusEventArgs message)
         {
-            MessageBox.Show("Simple Data Viewer cannot yet handle calls from other tools.");
+            MessageBox.Show("Universal Search cannot yet handle calls from other tools.");
         }
 
         public void ShowAboutDialog()
         {
-            MessageBox.Show("Simple Data Viewer\n\nD365 Saturday Sample project");
+            MessageBox.Show("Universal Search by Mike!");
         }
 
         private void btnFind_Click(object sender, EventArgs e)
         {
-            if (btnFind.Text == "Search")
+            if (btnFind.Text == "Search Records")
             {
                 btnFind.Text = "Cancel";
-                LoadData(this.EntitiesListViewControl1.CheckedEntities);
+                LoadData(this.EntitiesListView.CheckedEntities);
             }
             else
             {
                 CancelWorker(); // PluginBaseControl method that calls the Background Workers CancelAsync method.
-                btnFind.Text = "Search";
+                btnFind.Text = "Search Records";
             }
+        }
+
+        private void btnFindMetadata_Click(object sender, EventArgs e)
+        {
+            if (btnFindMetadata.Text == "Search Metadata")
+            {
+                btnFindMetadata.Text = "Cancel";
+                LoadMetadata(this.EntitiesListView.CheckedEntities);
+            }
+            else
+            {
+                CancelWorker(); // PluginBaseControl method that calls the Background Workers CancelAsync method.
+                btnFindMetadata.Text = "Search Metadata";
+            }
+        }
+
+        private void metadataSearchRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            this.updateSearchVisibility();
+        }
+
+        private void recordSearchRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            this.updateSearchVisibility();
+        }
+        private void updateSearchVisibility()
+        {
+            recordSearchGroup.Visible = recordSearchRadio.Checked;
+            metadataSearchGroup.Visible = metadataSearchRadio.Checked;
+            resultsGroup.Text = (metadataSearchRadio.Checked) ? "Metadata" : "Records";
         }
     }
 }
