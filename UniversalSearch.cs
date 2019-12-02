@@ -174,8 +174,18 @@ namespace MikeFactorial.XTB.Plugins
         private void searchMetadataObject(string entityName, object searchObject, string searchText, ref List<MetadataSearchResult> results)
         {
             if (searchObject == null) return;
+
+            var listObject = searchObject as System.Collections.IList;
+            if (listObject != null)
+            {
+                foreach (var listItem in listObject)
+                {
+                    searchMetadataObject(entityName, listItem, searchText, ref results);
+                }
+            }
+
             Type objType = searchObject.GetType();
-            PropertyInfo[] properties = objType.GetProperties();
+            PropertyInfo[] properties = objType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.CanRead).ToArray();
             foreach (PropertyInfo property in properties)
             {
                 object propValue = property.GetValue(searchObject, null);
