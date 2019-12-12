@@ -9,7 +9,6 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
     public class MetadataSearchResult
     {
         public string Link { get; set; }
-        public string Entity { get; set; }
         public string Metadata { get; set; }
         public string Item { get; set; }
         public string Type { get; set; }

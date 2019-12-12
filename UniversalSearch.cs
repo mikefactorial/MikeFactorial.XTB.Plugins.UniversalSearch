@@ -20,6 +20,7 @@ using XrmToolBox.Extensibility.Interfaces;
 using System.Reflection;
 using System.Xml.Serialization;
 using System.IO;
+using Microsoft.Crm.Sdk.Messages;
 
 namespace MikeFactorial.XTB.Plugins.UniversalSearch
 {
@@ -52,9 +53,13 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
         {
             foreach (TabPage tabPage in this.tabControl1.TabPages)
             {
-                foreach (xrmtb.XrmToolBox.Controls.CRMGridView view in tabPage.Controls)
+                foreach (object tab in tabPage.Controls)
                 {
-                    view.OrganizationService = newService;
+                    var view = tab as xrmtb.XrmToolBox.Controls.CRMGridView;
+                    if (view != null)
+                    {
+                        view.OrganizationService = newService;
+                    }
                 }
             }
             EntitiesListView.Service = newService;
@@ -75,9 +80,10 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                     long recordCount = 0;
                     int entityCount = 0;
                     List<EntityMetadata> nonSelectedEntities = new List<EntityMetadata>();
+                    int errors = 0;
                     for (int i = 0; i < selectedEntities.Count; i++)
                     {
-                        //try
+                        try
                         {
                             string textToSearch = searchTextBox.Text;
                             EntityMetadata selectedEntity = selectedEntities[i];
@@ -157,6 +163,10 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                                     }
                                 }
 
+                                if (worker.CancellationPending)
+                                {
+                                    return;
+                                }
                                 QueryExpression userQueryQuery = new QueryExpression("savedquery");
                                 userQueryQuery.ColumnSet = new ColumnSet("fetchxml", "layoutxml", "columnsetxml", "name");
                                 userQueryQuery.Criteria = new FilterExpression(LogicalOperator.And);
@@ -194,6 +204,10 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                                 }
                             }
 
+                            if (worker.CancellationPending)
+                            {
+                                return;
+                            }
                             List<MetadataSearchResult> results = new List<MetadataSearchResult>();
 
                             string itemIdentifier = "";
@@ -225,13 +239,21 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
 
                             entityCount++;
                         }
-                        /*catch (Exception e)
+                        catch (Exception e)
                         {
+                            errors++;
                             this.LogError(e.ToString());
                             worker.ReportProgress(0, $"Search Completed with Errors. Error Message: " + e.Message);
-                        }*/
+                        }
                     }
-                    worker.ReportProgress(0, $"Search Complete. Found {recordCount} records in {entityCount} entities.");
+                    if (recordCount == 0)
+                    {
+                        worker.ReportProgress(0, $"Search Complete. No metadata was found. Make sure you've selected the correct entities to search and that you are using * for wildcard searches otherwise the exact text will be matched.");
+                    }
+                    else
+                    {
+                        worker.ReportProgress(0, $"Search Complete. Found {recordCount} instances in {entityCount} entities with {errors} error(s).");
+                    }
 
                 },
                 ProgressChanged = (args) =>
@@ -295,7 +317,6 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                                 {
                                     results.Add(new MetadataSearchResult()
                                     {
-                                        Entity = entity.LogicalName,
                                         Link = this.BuildLinkForMetadataItem(entity, linkType),
                                         Property = property.Name,
                                         Value = propValue?.ToString(),
@@ -309,7 +330,6 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                             {
                                 results.Add(new MetadataSearchResult()
                                 {
-                                    Entity = entity.LogicalName,
                                     Link = this.BuildLinkForMetadataItem(entity, linkType),
                                     Property = property.Name,
                                     Value = propValue?.ToString(),
@@ -359,7 +379,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
         }
         private string BuildLinkForMetadataItem(EntityMetadata entity, string type)
         {
-            return "https://make.powerapps.com/environments/78014ed1-5010-45b2-bad6-f7714f1e4e38/entities/" + entity.MetadataId.ToString() + "/" + entity.LogicalName + "#" + type;
+            return $"https://make.powerapps.com/environments/{ConnectionDetail.Organization}/entities/{entity.MetadataId.ToString()}/{entity.LogicalName}#{type}";
         }
 
         private void LoadData(List<EntityMetadata> selectedEntities)
@@ -377,9 +397,10 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                     int entityCount = 0;
                     List<EntityMetadata> nonSelectedEntities = new List<EntityMetadata>();
                     Dictionary<Guid, string> matchedLookups = new Dictionary<Guid, string>();
+                    int errors = 0;
                     for (int i = 0; i < selectedEntities.Count; i++)
                     {
-                        //try
+                        try
                         {
                             EntityMetadata selectedEntity = selectedEntities[i];
                             double percentage = (double)(i + 1) / (double)selectedEntities.Count;
@@ -647,13 +668,21 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                                 }
                             }
                         }
-                        /* TODO catch (Exception e)
+                        catch (Exception e)
                         {
+                            errors++;
                             this.LogError(e.ToString());
                             worker.ReportProgress(0, $"Search Completed with Errors. Error Message: " + e.Message);
-                        }*/
+                        }
                     }
-                    worker.ReportProgress(0, $"Search Complete. Found {recordCount} records in {entityCount} entities.");
+                    if (recordCount == 0)
+                    {
+                        worker.ReportProgress(0, $"Search Complete. No records were found. Make sure you've selected the correct entities to search and that you are using * for wildcard searches otherwise the exact text will be matched.");
+                    }
+                    else
+                    {
+                        worker.ReportProgress(0, $"Search Complete. Found {recordCount} records in {entityCount} entities with {errors} error(s).");
+                    }
 
                 },
                 ProgressChanged = (args) =>
@@ -953,8 +982,19 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             metadataSearchRadio.Enabled = false;
             if (btnFind.Text == "Search Records")
             {
-                btnFind.Text = "Cancel";
-                LoadData(this.EntitiesListView.CheckedEntities);
+                if(this.EntitiesListView.CheckedEntities.Count == 0)
+                {
+                    MessageBox.Show("Please select at least one entity to search before continuing.", "No Entities Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else if (string.IsNullOrEmpty(searchTextBox.Text))
+                {
+                    MessageBox.Show("Please enter your search criteria in the search box. Use asterisks * to perform a wildcard search.", "No Search Criteria Entered", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    btnFind.Text = "Cancel";
+                    LoadData(this.EntitiesListView.CheckedEntities);
+                }
             }
             else
             {
@@ -971,8 +1011,19 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             metadataSearchRadio.Enabled = false;
             if (btnFindMetadata.Text == "Search Metadata")
             {
-                btnFindMetadata.Text = "Cancel";
-                LoadMetadata(this.EntitiesListView.CheckedEntities);
+                if (this.EntitiesListView.CheckedEntities.Count == 0)
+                {
+                    MessageBox.Show("Please select at least one entity to search before continuing.", "No Entities Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else if (string.IsNullOrEmpty(searchTextBox.Text))
+                {
+                    MessageBox.Show("Please enter your search criteria in the search box. Use asterisks * to perform a wildcard search", "No Search Criteria Entered", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    btnFindMetadata.Text = "Cancel";
+                    LoadMetadata(this.EntitiesListView.CheckedEntities);
+                }
             }
             else
             {

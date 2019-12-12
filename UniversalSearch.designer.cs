@@ -228,6 +228,7 @@
             // searchFormsViews
             // 
             this.searchFormsViews.AutoSize = true;
+            this.searchFormsViews.Checked = true;
             this.searchFormsViews.Location = new System.Drawing.Point(463, 10);
             this.searchFormsViews.Name = "searchFormsViews";
             this.searchFormsViews.Size = new System.Drawing.Size(143, 17);
