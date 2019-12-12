@@ -5,6 +5,7 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
+using MikeFactorial.XTB.Plugins.Xsd;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,8 +18,10 @@ using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Args;
 using XrmToolBox.Extensibility.Interfaces;
 using System.Reflection;
+using System.Xml.Serialization;
+using System.IO;
 
-namespace MikeFactorial.XTB.Plugins
+namespace MikeFactorial.XTB.Plugins.UniversalSearch
 {
     public partial class UniversalSearch : PluginControlBase, IStatusBarMessenger, IAboutPlugin, IGitHubPlugin, IHelpPlugin
     {
@@ -28,11 +31,15 @@ namespace MikeFactorial.XTB.Plugins
 
         public string HelpUrl => "https://mikefactorial.com/dynamics-365-universal-search-for-xrmtoolbox/";
 
+        private Type[] types = null;
+
         public UniversalSearch()
         {
             InitializeComponent();
             //EntitiesListViewControl1.Initialize(this, Service);
             EntitiesListView.SortList(0, SortOrder.Ascending);
+
+            this.types = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == "MikeFactorial.XTB.Plugins.Xsd").ToArray();
         }
 
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
@@ -70,7 +77,7 @@ namespace MikeFactorial.XTB.Plugins
                     List<EntityMetadata> nonSelectedEntities = new List<EntityMetadata>();
                     for (int i = 0; i < selectedEntities.Count; i++)
                     {
-                        try
+                        //try
                         {
                             string textToSearch = searchTextBox.Text;
                             EntityMetadata selectedEntity = selectedEntities[i];
@@ -105,7 +112,6 @@ namespace MikeFactorial.XTB.Plugins
                                 textToSearch = guidValue.ToString();
                             }
 
-
                             EntityMetadata relationshipMetadata = null;
                             if (attsToSearch != null)
                             {
@@ -120,23 +126,97 @@ namespace MikeFactorial.XTB.Plugins
                                 var relationshipResponse = (RetrieveEntityResponse)this.Service.Execute(request);
                                 relationshipMetadata = relationshipResponse.EntityMetadata;
                             }
-
                             if (worker.CancellationPending)
                             {
                                 return;
                             }
+                            var formsToSearch = new List<FormXml>();
+                            var fetchToSearch = new List<FetchXml>();
+                            var layoutToSearch = new List<LayoutXml>();
+                            if (searchFormsViews.Checked)
+                            {
+                                QueryExpression formQuery = new QueryExpression("systemform");
+                                formQuery.ColumnSet = new ColumnSet("formxml", "name");
+                                formQuery.Criteria = new FilterExpression(LogicalOperator.And);
+                                formQuery.Criteria.AddCondition("objecttypecode", ConditionOperator.Equal, selectedEntity.ObjectTypeCode.Value);
+                                var forms = this.Service.RetrieveMultiple(formQuery);
+                                foreach (var form in forms.Entities)
+                                {
+                                    if (form.Contains("formxml"))
+                                    {
+                                        var formObject = FormXml.Deserialize(form["formxml"].ToString());
+                                        if (form.Contains("name"))
+                                        {
+                                            formObject.FormName = form["name"].ToString();
+                                        }
+                                        else
+                                        {
+                                            formObject.FormName = "Unknown Form";
+                                        }
+                                        formsToSearch.Add(formObject);
+                                    }
+                                }
 
+                                QueryExpression userQueryQuery = new QueryExpression("savedquery");
+                                userQueryQuery.ColumnSet = new ColumnSet("fetchxml", "layoutxml", "columnsetxml", "name");
+                                userQueryQuery.Criteria = new FilterExpression(LogicalOperator.And);
+                                userQueryQuery.Criteria.AddCondition("returnedtypecode", ConditionOperator.Equal, selectedEntity.ObjectTypeCode.Value);
+                                var userViews = this.Service.RetrieveMultiple(userQueryQuery);
+                                foreach (var view in userViews.Entities)
+                                {
+                                    if (view.Contains("fetchxml"))
+                                    {
+                                        var fetchObject = FetchXml.Deserialize(view["fetchxml"].ToString());
+                                        if (view.Contains("name"))
+                                        {
+                                            fetchObject.ViewName = view["name"].ToString();
+                                        }
+                                        else
+                                        {
+                                            fetchObject.ViewName = "Unknown View";
+                                        }
+                                        fetchToSearch.Add(fetchObject);
+                                    }
+
+                                    if (view.Contains("layoutxml"))
+                                    {
+                                        var layoutObject = LayoutXml.Deserialize(view["layoutxml"].ToString());
+                                        if (view.Contains("name"))
+                                        {
+                                            layoutObject.ViewName = view["name"].ToString();
+                                        }
+                                        else
+                                        {
+                                            layoutObject.ViewName = "Unknown View";
+                                        }
+                                        layoutToSearch.Add(layoutObject);
+                                    }
+                                }
+                            }
 
                             List<MetadataSearchResult> results = new List<MetadataSearchResult>();
 
-                            this.searchMetadataObject(selectedEntity.LogicalName, selectedEntity, textToSearch, ref results);
+                            string itemIdentifier = "";
+                            this.searchMetadataObject(selectedEntity, string.Empty, "Entity", selectedEntity, itemIdentifier, textToSearch, ref results);
+                            if (formsToSearch.Count > 0)
+                            {
+                                this.searchMetadataObject(selectedEntity, "forms", "Form", formsToSearch, itemIdentifier, textToSearch, ref results);
+                            }
+                            if (fetchToSearch.Count > 0)
+                            {
+                                this.searchMetadataObject(selectedEntity, "views", "View Query", fetchToSearch, itemIdentifier, textToSearch, ref results);
+                            }
+                            if (layoutToSearch.Count > 0)
+                            {
+                                this.searchMetadataObject(selectedEntity, "views", "View Layout", layoutToSearch, itemIdentifier, textToSearch, ref results);
+                            }
                             if (attsToSearch != null)
                             {
-                                this.searchMetadataObject(selectedEntity.LogicalName, attsToSearch, textToSearch, ref results);
+                                this.searchMetadataObject(selectedEntity, "fields", "Attribute", attsToSearch, itemIdentifier, textToSearch, ref results);
                             }
                             if (relationshipMetadata != null)
                             {
-                                this.searchMetadataObject(selectedEntity.LogicalName, relationshipMetadata, textToSearch, ref results);
+                                this.searchMetadataObject(selectedEntity, "relationships", "Relationship", relationshipMetadata, itemIdentifier, textToSearch, ref results);
                             }
 
                             recordCount += results.Count;
@@ -145,11 +225,11 @@ namespace MikeFactorial.XTB.Plugins
 
                             entityCount++;
                         }
-                        catch (Exception e)
+                        /*catch (Exception e)
                         {
                             this.LogError(e.ToString());
                             worker.ReportProgress(0, $"Search Completed with Errors. Error Message: " + e.Message);
-                        }
+                        }*/
                     }
                     worker.ReportProgress(0, $"Search Complete. Found {recordCount} records in {entityCount} entities.");
 
@@ -161,6 +241,8 @@ namespace MikeFactorial.XTB.Plugins
                 },
                 PostWorkCallBack = (args) =>
                 {
+                    this.recordSearchRadio.Enabled = true;
+                    this.metadataSearchRadio.Enabled = true;
                     this.btnFindMetadata.Text = "Search Metadata";
                     if (args.Error != null)
                     {
@@ -171,68 +253,113 @@ namespace MikeFactorial.XTB.Plugins
             });
         }
 
-        private void searchMetadataObject(string entityName, object searchObject, string searchText, ref List<MetadataSearchResult> results)
+        private void searchMetadataObject(EntityMetadata entity, string linkType, string metadataType, object searchObject, string itemIdentifier, string searchText, ref List<MetadataSearchResult> results)
         {
             if (searchObject == null) return;
-
+            itemIdentifier = this.BuildItemIdentifier(searchObject, itemIdentifier);
             var listObject = searchObject as System.Collections.IList;
             if (listObject != null)
             {
                 foreach (var listItem in listObject)
                 {
-                    searchMetadataObject(entityName, listItem, searchText, ref results);
+                    searchMetadataObject(entity, linkType, metadataType, listItem, itemIdentifier, searchText, ref results);
                 }
             }
-
-            Type objType = searchObject.GetType();
-            PropertyInfo[] properties = objType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.CanRead).ToArray();
-            foreach (PropertyInfo property in properties)
+            else
             {
-                object propValue = property.GetValue(searchObject, null);
-                var elems = propValue as System.Collections.IList;
-                if (elems != null)
+                Type objType = searchObject.GetType();
+                PropertyInfo[] properties = objType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.CanRead).ToArray();
+                foreach (PropertyInfo property in properties)
                 {
-                    foreach (var item in elems)
+                    object propValue = property.GetValue(searchObject, null);
+                    var elems = propValue as System.Collections.IList;
+                    if (elems != null)
                     {
-                        searchMetadataObject(entityName, item, searchText, ref results);
-                    }
-                }
-                else
-                {
-                    // This will not cut-off System.Collections because of the first check
-                    if (property.PropertyType.Assembly == objType.Assembly)
-                    {
-                        searchMetadataObject(entityName, propValue, searchText, ref results);
+                        foreach (var item in elems)
+                        {
+                            searchMetadataObject(entity, linkType, metadataType, item, itemIdentifier, searchText, ref results);
+                        }
                     }
                     else
                     {
-                        if (!matchCaseCheckBox.Checked)
+                        // This will not cut-off System.Collections because of the first check
+                        if (property.PropertyType.Assembly == objType.Assembly)
                         {
-                            if (Regex.IsMatch(property.Name, WildCardToRegular(searchText), RegexOptions.IgnoreCase) || (!string.IsNullOrEmpty(propValue?.ToString()) && Regex.IsMatch(propValue?.ToString(), WildCardToRegular(searchText), RegexOptions.IgnoreCase)))
+                            searchMetadataObject(entity, linkType, metadataType, propValue, itemIdentifier, searchText, ref results);
+                        }
+                        else
+                        {
+                            if (!matchCaseMetadata.Checked)
+                            {
+                                if (Regex.IsMatch(property.Name, WildCardToRegular(searchText), RegexOptions.IgnoreCase) || (!string.IsNullOrEmpty(propValue?.ToString()) && Regex.IsMatch(propValue?.ToString(), WildCardToRegular(searchText), RegexOptions.IgnoreCase)))
+                                {
+                                    results.Add(new MetadataSearchResult()
+                                    {
+                                        Entity = entity.LogicalName,
+                                        Link = this.BuildLinkForMetadataItem(entity, linkType),
+                                        Property = property.Name,
+                                        Value = propValue?.ToString(),
+                                        Item = itemIdentifier,
+                                        Type = objType.ToString().Split('.').Last(),
+                                        Metadata = metadataType
+                                    });
+                                }
+                            }
+                            else if (Regex.IsMatch(property.Name, WildCardToRegular(searchText)) || (!string.IsNullOrEmpty(propValue?.ToString()) && Regex.IsMatch(propValue?.ToString(), WildCardToRegular(searchText))))
                             {
                                 results.Add(new MetadataSearchResult()
-                                { 
-                                     EntityName = entityName,
-                                     Property = property.Name,
-                                     Value = propValue?.ToString(),
-                                     Type = property.MemberType.ToString()
+                                {
+                                    Entity = entity.LogicalName,
+                                    Link = this.BuildLinkForMetadataItem(entity, linkType),
+                                    Property = property.Name,
+                                    Value = propValue?.ToString(),
+                                    Item = itemIdentifier,
+                                    Type = objType.ToString().Split('.').Last(),
+                                    Metadata = metadataType
                                 });
                             }
-                        }
-                        else if (Regex.IsMatch(property.Name, WildCardToRegular(searchText)) || (!string.IsNullOrEmpty(propValue?.ToString()) && Regex.IsMatch(propValue?.ToString(), WildCardToRegular(searchText))))
-                        {
-                            results.Add(new MetadataSearchResult()
-                            {
-                                EntityName = entityName,
-                                Property = property.Name,
-                                Value = propValue?.ToString(),
-                                Type = property.MemberType.ToString()
-                            });
                         }
                     }
                 }
             }
             return;
+        }
+
+        private string BuildItemIdentifier(object searchObject, string currentIdentifier)
+        {
+            if (searchObject is EntityMetadata)
+            {
+                return ((EntityMetadata)searchObject).DisplayName?.UserLocalizedLabel?.Label;
+            }
+            else if (searchObject is AttributeMetadata)
+            {
+                return ((AttributeMetadata)searchObject).DisplayName?.UserLocalizedLabel?.Label;
+            }
+            else if (searchObject is OneToManyRelationshipMetadata)
+            {
+                return $"{((OneToManyRelationshipMetadata)searchObject)?.ReferencedEntity} ({((OneToManyRelationshipMetadata)searchObject)?.ReferencedAttribute}) - {((OneToManyRelationshipMetadata)searchObject)?.ReferencingEntity} ({((OneToManyRelationshipMetadata)searchObject)?.ReferencingAttribute})";
+            }
+            else if (searchObject is ManyToManyRelationshipMetadata)
+            {
+                return $"{((ManyToManyRelationshipMetadata)searchObject)?.Entity1LogicalName} ({((ManyToManyRelationshipMetadata)searchObject)?.Entity1IntersectAttribute}) - {((ManyToManyRelationshipMetadata)searchObject)?.Entity2LogicalName} ({((ManyToManyRelationshipMetadata)searchObject)?.Entity2IntersectAttribute})";
+            }
+            else if (searchObject is FormXml)
+            {
+                return ((FormXml)searchObject).FormName;
+            }
+            else if (searchObject is FetchXml)
+            {
+                return ((FetchXml)searchObject).ViewName;
+            }
+            else if (searchObject is LayoutXml)
+            {
+                return ((LayoutXml)searchObject).ViewName;
+            }
+            return currentIdentifier;
+        }
+        private string BuildLinkForMetadataItem(EntityMetadata entity, string type)
+        {
+            return "https://make.powerapps.com/environments/78014ed1-5010-45b2-bad6-f7714f1e4e38/entities/" + entity.MetadataId.ToString() + "/" + entity.LogicalName + "#" + type;
         }
 
         private void LoadData(List<EntityMetadata> selectedEntities)
@@ -252,7 +379,7 @@ namespace MikeFactorial.XTB.Plugins
                     Dictionary<Guid, string> matchedLookups = new Dictionary<Guid, string>();
                     for (int i = 0; i < selectedEntities.Count; i++)
                     {
-                        try
+                        //try
                         {
                             EntityMetadata selectedEntity = selectedEntities[i];
                             double percentage = (double)(i + 1) / (double)selectedEntities.Count;
@@ -320,11 +447,11 @@ namespace MikeFactorial.XTB.Plugins
                             AttributeMetadata primaryNameAttribute = resp.EntityMetadata.Attributes.FirstOrDefault(a => a.LogicalName == selectedEntity.PrimaryNameAttribute);
                             if (primaryNameAttribute != null)
                             {
-                                if (primaryNameAttribute.IsValidForRead.Value)
+                                if (primaryNameAttribute.IsValidForRead.Value && string.IsNullOrEmpty(primaryNameAttribute.AttributeOf))
                                 {
-                                    query.ColumnSet.AddColumn(selectedEntity.PrimaryNameAttribute);
+                                    query.ColumnSet.AddColumn(primaryNameAttribute.LogicalName);
                                 }
-                                fe.AddCondition(selectedEntity.PrimaryNameAttribute, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
+                                fe.AddCondition(primaryNameAttribute.LogicalName, ConditionOperator.Like, this.searchTextBox.Text.Replace("*", "%"));
                             }
                             if (guidValue != Guid.Empty)
                             {
@@ -520,11 +647,11 @@ namespace MikeFactorial.XTB.Plugins
                                 }
                             }
                         }
-                        catch (Exception e)
+                        /* TODO catch (Exception e)
                         {
                             this.LogError(e.ToString());
                             worker.ReportProgress(0, $"Search Completed with Errors. Error Message: " + e.Message);
-                        }
+                        }*/
                     }
                     worker.ReportProgress(0, $"Search Complete. Found {recordCount} records in {entityCount} entities.");
 
@@ -536,6 +663,8 @@ namespace MikeFactorial.XTB.Plugins
                 },
                 PostWorkCallBack = (args) =>
                 {
+                    this.recordSearchRadio.Enabled = true;
+                    this.metadataSearchRadio.Enabled = true;
                     this.btnFind.Text = "Search Records";
                     if (args.Error != null)
                     {
@@ -645,7 +774,6 @@ namespace MikeFactorial.XTB.Plugins
                         gridData.ShowIndexColumn = false;
                         gridData.Size = new System.Drawing.Size(1587, 1090);
                         gridData.TabIndex = 0;
-                        gridData.RecordClick += new xrmtb.XrmToolBox.Controls.CRMRecordEventHandler(gridData_RecordClick);
                         gridData.RecordDoubleClick += new xrmtb.XrmToolBox.Controls.CRMRecordEventHandler(this.gridData_RecordDoubleClick);
                         gridData.DataSource = collection;
                         gridData.DataBindingComplete += GridData_DataBindingComplete;
@@ -684,12 +812,9 @@ namespace MikeFactorial.XTB.Plugins
                     gridData.RowHeadersVisible = false;
                     gridData.Size = new System.Drawing.Size(1587, 1090);
                     gridData.TabIndex = 0;
-                    /*
-                    gridData.RecordClick += new xrmtb.XrmToolBox.Controls.CRMRecordEventHandler(gridData_RecordClick);
-                    gridData.RecordDoubleClick += new xrmtb.XrmToolBox.Controls.CRMRecordEventHandler(this.gridData_RecordDoubleClick);
-                    */
+                    gridData.CellDoubleClick += gridData_CellDoubleClick;
                     gridData.DataSource = results;
-                    //gridData.DataBindingComplete += GridData_DataBindingComplete;
+                    gridData.DataBindingComplete += GridData_DataBindingComplete;
                     TabPage tabPage = new TabPage(entityName);
                     tabPage.Controls.Add(gridData);
                     this.tabControl1.TabPages.Add(tabPage);
@@ -697,9 +822,21 @@ namespace MikeFactorial.XTB.Plugins
             }
         }
 
+        private void gridData_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = ((DataGridView)sender).Rows[e.RowIndex];
+                string link = row.Cells[0].Value.ToString();
+                OpenMetadataReference(link);
+
+            }
+        }
+
         private void GridData_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
-            foreach (DataGridViewRow row in ((xrmtb.XrmToolBox.Controls.CRMGridView)sender).Rows)
+            ((DataGridView)sender).Columns[0].Visible = false;
+            foreach (DataGridViewRow row in ((DataGridView)sender).Rows)
             {
                 foreach (DataGridViewCell cell in row.Cells)
                 {
@@ -727,25 +864,33 @@ namespace MikeFactorial.XTB.Plugins
                     {
                         cell.Style.BackColor = Color.Yellow;
                     }
-
-                    if (this.matchCaseCheckBox.Checked)
+                    if (cell != null && cell.Value != null)
                     {
-                        if (LikeOperator.LikeString(cell.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))
+                        if (this.matchCaseCheckBox.Checked)
                         {
-                            cell.Style.BackColor = Color.Yellow;
+                            if (LikeOperator.LikeString(cell.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))
+                            {
+                                cell.Style.BackColor = Color.Yellow;
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (LikeOperator.LikeString(cell.Value.ToString().ToLower(), searchTextBox.Text.ToLower(), Microsoft.VisualBasic.CompareMethod.Binary))
+                        else
                         {
-                            cell.Style.BackColor = Color.Yellow;
+                            if (LikeOperator.LikeString(cell.Value.ToString().ToLower(), searchTextBox.Text.ToLower(), Microsoft.VisualBasic.CompareMethod.Binary))
+                            {
+                                cell.Style.BackColor = Color.Yellow;
+                            }
                         }
                     }
                 }
             }
         }
-
+        private void OpenMetadataReference(string url)
+        {
+            if (!string.IsNullOrEmpty(url))
+            {
+                Process.Start(url);
+            }
+        }
         private void OpenEntityReference(EntityReference entref)
         {
             if (!string.IsNullOrEmpty(entref.LogicalName) && !entref.Id.Equals(Guid.Empty))
@@ -777,14 +922,6 @@ namespace MikeFactorial.XTB.Plugins
             OpenEntityReference(e.Entity.ToEntityReference());
         }
 
-        private void gridData_RecordClick(object sender, xrmtb.XrmToolBox.Controls.CRMRecordEventArgs e)
-        {
-            if (e.Value is EntityReference entref)
-            {
-                OpenEntityReference(entref);
-            }
-        }
-
         private void SearchTextBox_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -812,6 +949,8 @@ namespace MikeFactorial.XTB.Plugins
 
         private void btnFind_Click(object sender, EventArgs e)
         {
+            recordSearchRadio.Enabled = false;
+            metadataSearchRadio.Enabled = false;
             if (btnFind.Text == "Search Records")
             {
                 btnFind.Text = "Cancel";
@@ -821,11 +960,15 @@ namespace MikeFactorial.XTB.Plugins
             {
                 CancelWorker(); // PluginBaseControl method that calls the Background Workers CancelAsync method.
                 btnFind.Text = "Search Records";
+                recordSearchRadio.Enabled = true;
+                metadataSearchRadio.Enabled = true;
             }
         }
 
         private void btnFindMetadata_Click(object sender, EventArgs e)
         {
+            recordSearchRadio.Enabled = false;
+            metadataSearchRadio.Enabled = false;
             if (btnFindMetadata.Text == "Search Metadata")
             {
                 btnFindMetadata.Text = "Cancel";
@@ -835,6 +978,8 @@ namespace MikeFactorial.XTB.Plugins
             {
                 CancelWorker(); // PluginBaseControl method that calls the Background Workers CancelAsync method.
                 btnFindMetadata.Text = "Search Metadata";
+                recordSearchRadio.Enabled = true;
+                metadataSearchRadio.Enabled = true;
             }
         }
 

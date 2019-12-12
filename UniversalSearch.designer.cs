@@ -1,4 +1,4 @@
-﻿namespace MikeFactorial.XTB.Plugins
+﻿namespace MikeFactorial.XTB.Plugins.UniversalSearch
 {
     partial class UniversalSearch
     {
@@ -23,22 +23,23 @@
             this.resultsGroup = new System.Windows.Forms.GroupBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.metadataSearchRadio = new System.Windows.Forms.RadioButton();
+            this.recordSearchRadio = new System.Windows.Forms.RadioButton();
+            this.searchTextBox = new System.Windows.Forms.TextBox();
+            this.metadataSearchGroup = new System.Windows.Forms.GroupBox();
+            this.matchCaseMetadata = new System.Windows.Forms.CheckBox();
+            this.searchRelationships = new System.Windows.Forms.CheckBox();
+            this.searchFormsViews = new System.Windows.Forms.CheckBox();
+            this.searchAttributes = new System.Windows.Forms.CheckBox();
+            this.searchEntities = new System.Windows.Forms.CheckBox();
+            this.btnFindMetadata = new System.Windows.Forms.Button();
             this.recordSearchGroup = new System.Windows.Forms.GroupBox();
             this.searchLookupText = new System.Windows.Forms.CheckBox();
             this.searchOptionSetText = new System.Windows.Forms.CheckBox();
             this.matchCaseCheckBox = new System.Windows.Forms.CheckBox();
             this.btnFind = new System.Windows.Forms.Button();
-            this.metadataSearchGroup = new System.Windows.Forms.GroupBox();
-            this.searchFormsViews = new System.Windows.Forms.CheckBox();
-            this.searchAttributes = new System.Windows.Forms.CheckBox();
-            this.searchEntities = new System.Windows.Forms.CheckBox();
-            this.btnFindMetadata = new System.Windows.Forms.Button();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.metadataSearchRadio = new System.Windows.Forms.RadioButton();
-            this.recordSearchRadio = new System.Windows.Forms.RadioButton();
-            this.searchTextBox = new System.Windows.Forms.TextBox();
             this.searchTextToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.searchRelationships = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -46,9 +47,9 @@
             this.groupBox1.SuspendLayout();
             this.resultsGroup.SuspendLayout();
             this.groupBox3.SuspendLayout();
-            this.recordSearchGroup.SuspendLayout();
-            this.metadataSearchGroup.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.metadataSearchGroup.SuspendLayout();
+            this.recordSearchGroup.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -128,8 +129,8 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.metadataSearchGroup);
             this.groupBox3.Controls.Add(this.groupBox2);
+            this.groupBox3.Controls.Add(this.metadataSearchGroup);
             this.groupBox3.Controls.Add(this.recordSearchGroup);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox3.Location = new System.Drawing.Point(0, 0);
@@ -138,6 +139,136 @@
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Search Criteria (Use asterisks * to perform a wildcard search)";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.metadataSearchRadio);
+            this.groupBox2.Controls.Add(this.recordSearchRadio);
+            this.groupBox2.Controls.Add(this.searchTextBox);
+            this.groupBox2.Location = new System.Drawing.Point(10, 14);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(740, 43);
+            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabStop = false;
+            // 
+            // metadataSearchRadio
+            // 
+            this.metadataSearchRadio.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.metadataSearchRadio.AutoSize = true;
+            this.metadataSearchRadio.Location = new System.Drawing.Point(630, 17);
+            this.metadataSearchRadio.Name = "metadataSearchRadio";
+            this.metadataSearchRadio.Size = new System.Drawing.Size(107, 17);
+            this.metadataSearchRadio.TabIndex = 7;
+            this.metadataSearchRadio.Text = "Metadata Search";
+            this.metadataSearchRadio.UseVisualStyleBackColor = true;
+            this.metadataSearchRadio.CheckedChanged += new System.EventHandler(this.metadataSearchRadio_CheckedChanged);
+            // 
+            // recordSearchRadio
+            // 
+            this.recordSearchRadio.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.recordSearchRadio.AutoSize = true;
+            this.recordSearchRadio.Checked = true;
+            this.recordSearchRadio.Location = new System.Drawing.Point(533, 17);
+            this.recordSearchRadio.Name = "recordSearchRadio";
+            this.recordSearchRadio.Size = new System.Drawing.Size(97, 17);
+            this.recordSearchRadio.TabIndex = 6;
+            this.recordSearchRadio.TabStop = true;
+            this.recordSearchRadio.Text = "Record Search";
+            this.recordSearchRadio.UseVisualStyleBackColor = true;
+            this.recordSearchRadio.CheckedChanged += new System.EventHandler(this.recordSearchRadio_CheckedChanged);
+            // 
+            // searchTextBox
+            // 
+            this.searchTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchTextBox.Location = new System.Drawing.Point(3, 16);
+            this.searchTextBox.Margin = new System.Windows.Forms.Padding(1);
+            this.searchTextBox.Name = "searchTextBox";
+            this.searchTextBox.Size = new System.Drawing.Size(516, 20);
+            this.searchTextBox.TabIndex = 5;
+            this.searchTextToolTip.SetToolTip(this.searchTextBox, "Enter the value to search. Use wildcard (*) to perform a wildcard search.");
+            // 
+            // metadataSearchGroup
+            // 
+            this.metadataSearchGroup.Controls.Add(this.matchCaseMetadata);
+            this.metadataSearchGroup.Controls.Add(this.searchRelationships);
+            this.metadataSearchGroup.Controls.Add(this.searchFormsViews);
+            this.metadataSearchGroup.Controls.Add(this.searchAttributes);
+            this.metadataSearchGroup.Controls.Add(this.searchEntities);
+            this.metadataSearchGroup.Controls.Add(this.btnFindMetadata);
+            this.metadataSearchGroup.Location = new System.Drawing.Point(9, 50);
+            this.metadataSearchGroup.Name = "metadataSearchGroup";
+            this.metadataSearchGroup.Size = new System.Drawing.Size(740, 32);
+            this.metadataSearchGroup.TabIndex = 11;
+            this.metadataSearchGroup.TabStop = false;
+            this.metadataSearchGroup.Visible = false;
+            // 
+            // matchCaseMetadata
+            // 
+            this.matchCaseMetadata.AutoSize = true;
+            this.matchCaseMetadata.Location = new System.Drawing.Point(7, 9);
+            this.matchCaseMetadata.Name = "matchCaseMetadata";
+            this.matchCaseMetadata.Size = new System.Drawing.Size(83, 17);
+            this.matchCaseMetadata.TabIndex = 12;
+            this.matchCaseMetadata.Text = "Match Case";
+            this.matchCaseMetadata.UseVisualStyleBackColor = true;
+            // 
+            // searchRelationships
+            // 
+            this.searchRelationships.AutoSize = true;
+            this.searchRelationships.Checked = true;
+            this.searchRelationships.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.searchRelationships.Location = new System.Drawing.Point(326, 10);
+            this.searchRelationships.Name = "searchRelationships";
+            this.searchRelationships.Size = new System.Drawing.Size(126, 17);
+            this.searchRelationships.TabIndex = 11;
+            this.searchRelationships.Text = "Search Relationships";
+            this.searchRelationships.UseVisualStyleBackColor = true;
+            // 
+            // searchFormsViews
+            // 
+            this.searchFormsViews.AutoSize = true;
+            this.searchFormsViews.Location = new System.Drawing.Point(463, 10);
+            this.searchFormsViews.Name = "searchFormsViews";
+            this.searchFormsViews.Size = new System.Drawing.Size(143, 17);
+            this.searchFormsViews.TabIndex = 10;
+            this.searchFormsViews.Text = "Search Forms and Views";
+            this.searchFormsViews.UseVisualStyleBackColor = true;
+            // 
+            // searchAttributes
+            // 
+            this.searchAttributes.AutoSize = true;
+            this.searchAttributes.Checked = true;
+            this.searchAttributes.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.searchAttributes.Location = new System.Drawing.Point(207, 9);
+            this.searchAttributes.Name = "searchAttributes";
+            this.searchAttributes.Size = new System.Drawing.Size(107, 17);
+            this.searchAttributes.TabIndex = 9;
+            this.searchAttributes.Text = "Search Attributes";
+            this.searchAttributes.UseVisualStyleBackColor = true;
+            // 
+            // searchEntities
+            // 
+            this.searchEntities.AutoSize = true;
+            this.searchEntities.Checked = true;
+            this.searchEntities.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.searchEntities.Location = new System.Drawing.Point(102, 10);
+            this.searchEntities.Name = "searchEntities";
+            this.searchEntities.Size = new System.Drawing.Size(95, 17);
+            this.searchEntities.TabIndex = 8;
+            this.searchEntities.Text = "Search Entites";
+            this.searchEntities.UseVisualStyleBackColor = true;
+            // 
+            // btnFindMetadata
+            // 
+            this.btnFindMetadata.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnFindMetadata.Location = new System.Drawing.Point(618, 8);
+            this.btnFindMetadata.Name = "btnFindMetadata";
+            this.btnFindMetadata.Size = new System.Drawing.Size(119, 23);
+            this.btnFindMetadata.TabIndex = 7;
+            this.btnFindMetadata.Text = "Search Metadata";
+            this.btnFindMetadata.UseVisualStyleBackColor = true;
+            this.btnFindMetadata.Click += new System.EventHandler(this.btnFindMetadata_Click);
             // 
             // recordSearchGroup
             // 
@@ -192,130 +323,11 @@
             this.btnFind.UseVisualStyleBackColor = true;
             this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
             // 
-            // metadataSearchGroup
-            // 
-            this.metadataSearchGroup.Controls.Add(this.searchRelationships);
-            this.metadataSearchGroup.Controls.Add(this.searchFormsViews);
-            this.metadataSearchGroup.Controls.Add(this.searchAttributes);
-            this.metadataSearchGroup.Controls.Add(this.searchEntities);
-            this.metadataSearchGroup.Controls.Add(this.btnFindMetadata);
-            this.metadataSearchGroup.Location = new System.Drawing.Point(9, 50);
-            this.metadataSearchGroup.Name = "metadataSearchGroup";
-            this.metadataSearchGroup.Size = new System.Drawing.Size(740, 32);
-            this.metadataSearchGroup.TabIndex = 11;
-            this.metadataSearchGroup.TabStop = false;
-            this.metadataSearchGroup.Visible = false;
-            // 
-            // searchFormsViews
-            // 
-            this.searchFormsViews.AutoSize = true;
-            this.searchFormsViews.Location = new System.Drawing.Point(441, 10);
-            this.searchFormsViews.Name = "searchFormsViews";
-            this.searchFormsViews.Size = new System.Drawing.Size(143, 17);
-            this.searchFormsViews.TabIndex = 10;
-            this.searchFormsViews.Text = "Search Forms and Views";
-            this.searchFormsViews.UseVisualStyleBackColor = true;
-            // 
-            // searchAttributes
-            // 
-            this.searchAttributes.AutoSize = true;
-            this.searchAttributes.Checked = true;
-            this.searchAttributes.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.searchAttributes.Location = new System.Drawing.Point(142, 9);
-            this.searchAttributes.Name = "searchAttributes";
-            this.searchAttributes.Size = new System.Drawing.Size(107, 17);
-            this.searchAttributes.TabIndex = 9;
-            this.searchAttributes.Text = "Search Attributes";
-            this.searchAttributes.UseVisualStyleBackColor = true;
-            // 
-            // searchEntities
-            // 
-            this.searchEntities.AutoSize = true;
-            this.searchEntities.Checked = true;
-            this.searchEntities.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.searchEntities.Location = new System.Drawing.Point(6, 10);
-            this.searchEntities.Name = "searchEntities";
-            this.searchEntities.Size = new System.Drawing.Size(95, 17);
-            this.searchEntities.TabIndex = 8;
-            this.searchEntities.Text = "Search Entites";
-            this.searchEntities.UseVisualStyleBackColor = true;
-            // 
-            // btnFindMetadata
-            // 
-            this.btnFindMetadata.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnFindMetadata.Location = new System.Drawing.Point(618, 8);
-            this.btnFindMetadata.Name = "btnFindMetadata";
-            this.btnFindMetadata.Size = new System.Drawing.Size(119, 23);
-            this.btnFindMetadata.TabIndex = 7;
-            this.btnFindMetadata.Text = "Search Metadata";
-            this.btnFindMetadata.UseVisualStyleBackColor = true;
-            this.btnFindMetadata.Click += new System.EventHandler(this.btnFindMetadata_Click);
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.metadataSearchRadio);
-            this.groupBox2.Controls.Add(this.recordSearchRadio);
-            this.groupBox2.Controls.Add(this.searchTextBox);
-            this.groupBox2.Location = new System.Drawing.Point(10, 14);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(740, 43);
-            this.groupBox2.TabIndex = 6;
-            this.groupBox2.TabStop = false;
-            // 
-            // metadataSearchRadio
-            // 
-            this.metadataSearchRadio.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.metadataSearchRadio.AutoSize = true;
-            this.metadataSearchRadio.Location = new System.Drawing.Point(630, 17);
-            this.metadataSearchRadio.Name = "metadataSearchRadio";
-            this.metadataSearchRadio.Size = new System.Drawing.Size(107, 17);
-            this.metadataSearchRadio.TabIndex = 7;
-            this.metadataSearchRadio.Text = "Metadata Search";
-            this.metadataSearchRadio.UseVisualStyleBackColor = true;
-            this.metadataSearchRadio.CheckedChanged += new System.EventHandler(this.metadataSearchRadio_CheckedChanged);
-            // 
-            // recordSearchRadio
-            // 
-            this.recordSearchRadio.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.recordSearchRadio.AutoSize = true;
-            this.recordSearchRadio.Checked = true;
-            this.recordSearchRadio.Location = new System.Drawing.Point(533, 17);
-            this.recordSearchRadio.Name = "recordSearchRadio";
-            this.recordSearchRadio.Size = new System.Drawing.Size(97, 17);
-            this.recordSearchRadio.TabIndex = 6;
-            this.recordSearchRadio.TabStop = true;
-            this.recordSearchRadio.Text = "Record Search";
-            this.recordSearchRadio.UseVisualStyleBackColor = true;
-            this.recordSearchRadio.CheckedChanged += new System.EventHandler(this.recordSearchRadio_CheckedChanged);
-            // 
-            // searchTextBox
-            // 
-            this.searchTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.searchTextBox.Location = new System.Drawing.Point(3, 16);
-            this.searchTextBox.Margin = new System.Windows.Forms.Padding(1);
-            this.searchTextBox.Name = "searchTextBox";
-            this.searchTextBox.Size = new System.Drawing.Size(516, 20);
-            this.searchTextBox.TabIndex = 5;
-            this.searchTextToolTip.SetToolTip(this.searchTextBox, "Enter the value to search. Use wildcard (*) to perform a wildcard search.");
-            // 
             // searchTextToolTip
             // 
             this.searchTextToolTip.AutoPopDelay = 1000;
             this.searchTextToolTip.InitialDelay = 500;
             this.searchTextToolTip.ReshowDelay = 100;
-            // 
-            // searchRelationships
-            // 
-            this.searchRelationships.AutoSize = true;
-            this.searchRelationships.Checked = true;
-            this.searchRelationships.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.searchRelationships.Location = new System.Drawing.Point(284, 10);
-            this.searchRelationships.Name = "searchRelationships";
-            this.searchRelationships.Size = new System.Drawing.Size(126, 17);
-            this.searchRelationships.TabIndex = 11;
-            this.searchRelationships.Text = "Search Relationships";
-            this.searchRelationships.UseVisualStyleBackColor = true;
             // 
             // UniversalSearch
             // 
@@ -333,12 +345,12 @@
             this.groupBox1.ResumeLayout(false);
             this.resultsGroup.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
-            this.recordSearchGroup.ResumeLayout(false);
-            this.recordSearchGroup.PerformLayout();
-            this.metadataSearchGroup.ResumeLayout(false);
-            this.metadataSearchGroup.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.metadataSearchGroup.ResumeLayout(false);
+            this.metadataSearchGroup.PerformLayout();
+            this.recordSearchGroup.ResumeLayout(false);
+            this.recordSearchGroup.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -364,5 +376,6 @@
         private System.Windows.Forms.CheckBox searchEntities;
         private System.Windows.Forms.Button btnFindMetadata;
         private System.Windows.Forms.CheckBox searchRelationships;
+        private System.Windows.Forms.CheckBox matchCaseMetadata;
     }
 }
