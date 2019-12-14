@@ -32,20 +32,17 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
 
         public string HelpUrl => "https://mikefactorial.com/dynamics-365-universal-search-for-xrmtoolbox/";
 
-        private Type[] types = null;
-
         public UniversalSearch()
         {
             InitializeComponent();
             //EntitiesListViewControl1.Initialize(this, Service);
             EntitiesListView.SortList(0, SortOrder.Ascending);
-
-            this.types = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == "MikeFactorial.XTB.Plugins.Xsd").ToArray();
         }
 
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
         delegate void AddTabCallback(EntityCollection collection);
         delegate void AddMetadataTabCallback(string entityName, List<MetadataSearchResult> results);
+
         /// <summary>
         /// This event occurs when the connection has been updated in XrmToolBox
         /// </summary>
@@ -88,7 +85,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                             string textToSearch = searchTextBox.Text;
                             EntityMetadata selectedEntity = selectedEntities[i];
                             double percentage = (double)(i + 1) / (double)selectedEntities.Count;
-                            percentage = percentage * (double)100;
+                            percentage *= (double)100;
 
                             List<AttributeMetadata> attsToSearch = null;
                             worker.ReportProgress(Convert.ToInt32(percentage), $"Searching {selectedEntity.LogicalName} metadata.");
