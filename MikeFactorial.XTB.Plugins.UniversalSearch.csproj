@@ -91,6 +91,12 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.IO.Compression.ZipFile, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>packages\System.IO.Compression.ZipFile.4.3.0\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Net.Http, Version=4.1.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll</HintPath>
       <Private>True</Private>
@@ -155,8 +161,9 @@
     <Reference Include="WeifenLuo.WinFormsUI.Docking.ThemeVS2015, Version=3.0.6.0, Culture=neutral, PublicKeyToken=5cded1a1a0a7b481, processorArchitecture=MSIL">
       <HintPath>packages\DockPanelSuite.ThemeVS2015.3.0.6\lib\net40\WeifenLuo.WinFormsUI.Docking.ThemeVS2015.dll</HintPath>
     </Reference>
-    <Reference Include="xrmtb.XrmToolBox.Controls, Version=1.2019.7.6, Culture=neutral, PublicKeyToken=34def2c40500c62c, processorArchitecture=MSIL">
-      <HintPath>packages\xrmtb.XrmToolBox.Controls.1.2019.7.6\lib\net47\xrmtb.XrmToolBox.Controls.dll</HintPath>
+    <Reference Include="xrmtb.XrmToolBox.Controls, Version=1.2020.5.7, Culture=neutral, PublicKeyToken=34def2c40500c62c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\xrmtb.XrmToolBox.Controls\XrmToolBox.Controls\bin\Debug\xrmtb.XrmToolBox.Controls.dll</HintPath>
     </Reference>
     <Reference Include="XrmToolBox, Version=1.2019.11.35, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\XrmToolBoxPackage.1.2019.11.35\lib\net462\XrmToolBox.exe</HintPath>
@@ -169,6 +176,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SolutionSearchResult.cs" />
     <Compile Include="MetadataSearchResult.cs" />
     <Compile Include="UniversalSearchTool.cs" />
     <Compile Include="UniversalSearch.cs">

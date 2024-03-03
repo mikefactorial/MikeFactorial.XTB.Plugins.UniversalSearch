@@ -1,4 +1,6 @@
-﻿namespace MikeFactorial.XTB.Plugins.UniversalSearch
+﻿using System.Windows.Forms;
+
+namespace MikeFactorial.XTB.Plugins.UniversalSearch
 {
     partial class UniversalSearch
     {
@@ -24,21 +26,21 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.metadataSearchRadio = new System.Windows.Forms.RadioButton();
-            this.recordSearchRadio = new System.Windows.Forms.RadioButton();
             this.searchTextBox = new System.Windows.Forms.TextBox();
             this.metadataSearchGroup = new System.Windows.Forms.GroupBox();
+            this.solutionSearchGroup = new System.Windows.Forms.GroupBox();
             this.matchCaseMetadata = new System.Windows.Forms.CheckBox();
             this.searchRelationships = new System.Windows.Forms.CheckBox();
             this.searchFormsViews = new System.Windows.Forms.CheckBox();
             this.searchAttributes = new System.Windows.Forms.CheckBox();
             this.searchEntities = new System.Windows.Forms.CheckBox();
-            this.btnFindMetadata = new System.Windows.Forms.Button();
             this.recordSearchGroup = new System.Windows.Forms.GroupBox();
             this.searchLookupText = new System.Windows.Forms.CheckBox();
             this.searchOptionSetText = new System.Windows.Forms.CheckBox();
             this.matchCaseCheckBox = new System.Windows.Forms.CheckBox();
+            this.alwaysGetLatestSolutionCheckBox = new System.Windows.Forms.CheckBox();
             this.btnFind = new System.Windows.Forms.Button();
+            this.searchLocationList = new System.Windows.Forms.ComboBox();
             this.searchTextToolTip = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -49,6 +51,7 @@
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.metadataSearchGroup.SuspendLayout();
+            this.solutionSearchGroup.SuspendLayout();
             this.recordSearchGroup.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,7 +82,7 @@
             this.groupBox1.Size = new System.Drawing.Size(284, 537);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Entity";
+            this.groupBox1.Text = "Entities";
             // 
             // EntitiesListView
             // 
@@ -132,6 +135,7 @@
             this.groupBox3.Controls.Add(this.groupBox2);
             this.groupBox3.Controls.Add(this.metadataSearchGroup);
             this.groupBox3.Controls.Add(this.recordSearchGroup);
+            this.groupBox3.Controls.Add(this.solutionSearchGroup);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox3.Location = new System.Drawing.Point(0, 0);
             this.groupBox3.Name = "groupBox3";
@@ -142,40 +146,14 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.metadataSearchRadio);
-            this.groupBox2.Controls.Add(this.recordSearchRadio);
             this.groupBox2.Controls.Add(this.searchTextBox);
+            this.groupBox2.Controls.Add(this.searchLocationList);
+            this.groupBox2.Controls.Add(this.btnFind);
             this.groupBox2.Location = new System.Drawing.Point(10, 14);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(740, 43);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
-            // 
-            // metadataSearchRadio
-            // 
-            this.metadataSearchRadio.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.metadataSearchRadio.AutoSize = true;
-            this.metadataSearchRadio.Location = new System.Drawing.Point(630, 17);
-            this.metadataSearchRadio.Name = "metadataSearchRadio";
-            this.metadataSearchRadio.Size = new System.Drawing.Size(107, 17);
-            this.metadataSearchRadio.TabIndex = 7;
-            this.metadataSearchRadio.Text = "Metadata Search";
-            this.metadataSearchRadio.UseVisualStyleBackColor = true;
-            this.metadataSearchRadio.CheckedChanged += new System.EventHandler(this.metadataSearchRadio_CheckedChanged);
-            // 
-            // recordSearchRadio
-            // 
-            this.recordSearchRadio.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.recordSearchRadio.AutoSize = true;
-            this.recordSearchRadio.Checked = true;
-            this.recordSearchRadio.Location = new System.Drawing.Point(533, 17);
-            this.recordSearchRadio.Name = "recordSearchRadio";
-            this.recordSearchRadio.Size = new System.Drawing.Size(97, 17);
-            this.recordSearchRadio.TabIndex = 6;
-            this.recordSearchRadio.TabStop = true;
-            this.recordSearchRadio.Text = "Record Search";
-            this.recordSearchRadio.UseVisualStyleBackColor = true;
-            this.recordSearchRadio.CheckedChanged += new System.EventHandler(this.recordSearchRadio_CheckedChanged);
             // 
             // searchTextBox
             // 
@@ -195,13 +173,23 @@
             this.metadataSearchGroup.Controls.Add(this.searchFormsViews);
             this.metadataSearchGroup.Controls.Add(this.searchAttributes);
             this.metadataSearchGroup.Controls.Add(this.searchEntities);
-            this.metadataSearchGroup.Controls.Add(this.btnFindMetadata);
             this.metadataSearchGroup.Location = new System.Drawing.Point(9, 50);
             this.metadataSearchGroup.Name = "metadataSearchGroup";
             this.metadataSearchGroup.Size = new System.Drawing.Size(740, 32);
             this.metadataSearchGroup.TabIndex = 11;
             this.metadataSearchGroup.TabStop = false;
             this.metadataSearchGroup.Visible = false;
+            // 
+            // solutionSearchGroup
+            // 
+            this.solutionSearchGroup.Controls.Add(this.alwaysGetLatestSolutionCheckBox);
+            this.solutionSearchGroup.Location = new System.Drawing.Point(9, 50);
+            this.solutionSearchGroup.Name = "solutionSearchGroup";
+            this.solutionSearchGroup.Size = new System.Drawing.Size(740, 32);
+            this.solutionSearchGroup.TabIndex = 11;
+            this.solutionSearchGroup.TabStop = false;
+            this.solutionSearchGroup.Visible = false;
+
             // 
             // matchCaseMetadata
             // 
@@ -259,24 +247,13 @@
             this.searchEntities.TabIndex = 8;
             this.searchEntities.Text = "Search Entites";
             this.searchEntities.UseVisualStyleBackColor = true;
-            // 
-            // btnFindMetadata
-            // 
-            this.btnFindMetadata.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnFindMetadata.Location = new System.Drawing.Point(618, 8);
-            this.btnFindMetadata.Name = "btnFindMetadata";
-            this.btnFindMetadata.Size = new System.Drawing.Size(119, 23);
-            this.btnFindMetadata.TabIndex = 7;
-            this.btnFindMetadata.Text = "Search Metadata";
-            this.btnFindMetadata.UseVisualStyleBackColor = true;
-            this.btnFindMetadata.Click += new System.EventHandler(this.btnFindMetadata_Click);
+
             // 
             // recordSearchGroup
             // 
             this.recordSearchGroup.Controls.Add(this.searchLookupText);
             this.recordSearchGroup.Controls.Add(this.searchOptionSetText);
             this.recordSearchGroup.Controls.Add(this.matchCaseCheckBox);
-            this.recordSearchGroup.Controls.Add(this.btnFind);
             this.recordSearchGroup.Location = new System.Drawing.Point(10, 50);
             this.recordSearchGroup.Name = "recordSearchGroup";
             this.recordSearchGroup.Size = new System.Drawing.Size(740, 32);
@@ -313,12 +290,23 @@
             this.matchCaseCheckBox.Text = "Match Case (slow)";
             this.matchCaseCheckBox.UseVisualStyleBackColor = true;
             // 
+            // alwaysGetLatestSolutionCheckBox
+            // 
+            this.alwaysGetLatestSolutionCheckBox.AutoSize = true;
+            this.alwaysGetLatestSolutionCheckBox.Location = new System.Drawing.Point(6, 10);
+            this.alwaysGetLatestSolutionCheckBox.Name = "alwaysGetLatestSolutionCheckBox";
+            this.alwaysGetLatestSolutionCheckBox.Size = new System.Drawing.Size(113, 17);
+            this.alwaysGetLatestSolutionCheckBox.TabIndex = 8;
+            this.alwaysGetLatestSolutionCheckBox.Text = "Alway export latest solution version";
+            this.alwaysGetLatestSolutionCheckBox.UseVisualStyleBackColor = true;
+            this.alwaysGetLatestSolutionCheckBox.UseVisualStyleBackColor = true;
+            // 
             // btnFind
             // 
             this.btnFind.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnFind.Location = new System.Drawing.Point(618, 8);
+            this.btnFind.Location = new System.Drawing.Point(630, 16);
             this.btnFind.Name = "btnFind";
-            this.btnFind.Size = new System.Drawing.Size(119, 23);
+            this.btnFind.Size = new System.Drawing.Size(100, 21);
             this.btnFind.TabIndex = 7;
             this.btnFind.Text = "Search Records";
             this.btnFind.UseVisualStyleBackColor = true;
@@ -329,6 +317,23 @@
             this.searchTextToolTip.AutoPopDelay = 1000;
             this.searchTextToolTip.InitialDelay = 500;
             this.searchTextToolTip.ReshowDelay = 100;
+            // 
+            // searchLocationList
+            // 
+            this.searchLocationList.FormattingEnabled = true;
+            this.searchLocationList.Items.AddRange(new object[] {
+        "Records",
+        "Metadata",
+        "Solution"});
+            this.searchLocationList.SelectedIndex = 0;
+            this.searchLocationList.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.searchLocationList.Location = new System.Drawing.Point(523, 16);
+            this.searchLocationList.Name = "searchLocationList";
+            this.searchLocationList.Size = new System.Drawing.Size(100, 21);
+            this.searchLocationList.TabIndex = 8;
+            this.searchLocationList.DropDownWidth = 250;
+            this.searchLocationList.SelectedIndexChanged += SearchLocationList_SelectedIndexChanged;
+
             // 
             // UniversalSearch
             // 
@@ -348,6 +353,8 @@
             this.groupBox3.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.solutionSearchGroup.ResumeLayout(false);
+            this.solutionSearchGroup.PerformLayout();
             this.metadataSearchGroup.ResumeLayout(false);
             this.metadataSearchGroup.PerformLayout();
             this.recordSearchGroup.ResumeLayout(false);
@@ -355,6 +362,8 @@
             this.ResumeLayout(false);
 
         }
+
+
         private System.Windows.Forms.SplitContainer splitContainer1;
         private xrmtb.XrmToolBox.Controls.EntitiesListControl EntitiesListView;
         private System.Windows.Forms.GroupBox groupBox1;
@@ -364,18 +373,18 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.ToolTip searchTextToolTip;
+        private System.Windows.Forms.ComboBox searchLocationList;
         private System.Windows.Forms.GroupBox recordSearchGroup;
         private System.Windows.Forms.CheckBox matchCaseCheckBox;
+        private System.Windows.Forms.CheckBox alwaysGetLatestSolutionCheckBox;
         private System.Windows.Forms.Button btnFind;
         private System.Windows.Forms.CheckBox searchLookupText;
         private System.Windows.Forms.CheckBox searchOptionSetText;
-        private System.Windows.Forms.RadioButton metadataSearchRadio;
-        private System.Windows.Forms.RadioButton recordSearchRadio;
+        private System.Windows.Forms.GroupBox solutionSearchGroup;
         private System.Windows.Forms.GroupBox metadataSearchGroup;
         private System.Windows.Forms.CheckBox searchFormsViews;
         private System.Windows.Forms.CheckBox searchAttributes;
         private System.Windows.Forms.CheckBox searchEntities;
-        private System.Windows.Forms.Button btnFindMetadata;
         private System.Windows.Forms.CheckBox searchRelationships;
         private System.Windows.Forms.CheckBox matchCaseMetadata;
     }

@@ -1,9 +1,11 @@
-﻿using xrmtb.XrmToolBox.Controls;
-using McTools.Xrm.Connection;
+﻿using McTools.Xrm.Connection;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.VisualBasic.CompilerServices;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Organization;
 using Microsoft.Xrm.Sdk.Query;
 using MikeFactorial.XTB.Plugins.Xsd;
 using System;
@@ -11,16 +13,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
+using xrmtb.XrmToolBox.Controls;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Args;
 using XrmToolBox.Extensibility.Interfaces;
-using System.Reflection;
-using System.Xml.Serialization;
-using System.IO;
-using Microsoft.Crm.Sdk.Messages;
 
 namespace MikeFactorial.XTB.Plugins.UniversalSearch
 {
@@ -35,13 +38,25 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
         public UniversalSearch()
         {
             InitializeComponent();
-            //EntitiesListViewControl1.Initialize(this, Service);
+            EntitiesListView.SolutionsDropDown.ComboBox.DropDownWidth = 400;
+            EntitiesListView.SolutionsDropDown.ComboBox.DropDownHeight = 300;
+            EntitiesListView.SolutionsDropDown.ComboBox.DataSourceChanged += SolutionsDropDown_DataSourceChanged;
             EntitiesListView.SortList(0, SortOrder.Ascending);
+        }
+
+        private void SolutionsDropDown_DataSourceChanged(object sender, EventArgs e)
+        {
+            if (EntitiesListView.SolutionsDropDown != null && EntitiesListView.SolutionsDropDown.ComboBox.DataSource != null)
+            {
+                //var defaultSolution = ((List<ListDisplayItem>)EntitiesListView.SolutionsDropDown.DataSource).FirstOrDefault(i => i.Name.ToLower() == "default");
+                //EntitiesListView.SolutionsDropDown.SelectedItem = defaultSolution;
+            }
         }
 
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
         delegate void AddTabCallback(EntityCollection collection);
         delegate void AddMetadataTabCallback(string entityName, List<MetadataSearchResult> results);
+        delegate void AddSolutionTabCallback(string directoryName, List<SolutionSearchResult> results);
 
         /// <summary>
         /// This event occurs when the connection has been updated in XrmToolBox
@@ -239,7 +254,11 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                         catch (Exception e)
                         {
                             errors++;
-                            this.LogError(e.ToString());
+                            try
+                            {
+                                this.LogError(e.ToString());
+                            }
+                            catch { }
                             worker.ReportProgress(0, $"Search Completed with Errors. Error Message: " + e.Message);
                         }
                     }
@@ -260,9 +279,8 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 },
                 PostWorkCallBack = (args) =>
                 {
-                    this.recordSearchRadio.Enabled = true;
-                    this.metadataSearchRadio.Enabled = true;
-                    this.btnFindMetadata.Text = "Search Metadata";
+                    this.searchLocationList.Enabled = true;
+                    this.btnFind.Text = "Search";
                     if (args.Error != null)
                     {
                         MessageBox.Show(args.Error.Message, "Oh crap", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -272,6 +290,149 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             });
         }
 
+        private void LoadSolution(object selectedSolution)
+        {
+            this.tabControl1.TabPages.Clear();
+            WorkAsync(new WorkAsyncInfo
+            {
+                IsCancelable = true,
+                Message = $"Exporting {((ListDisplayItem)selectedSolution).ToString()}...",
+                AsyncArgument = selectedSolution,
+                Work = (worker, args) =>
+                {
+                    long recordCount = 0;
+                    int fileCount = 0;
+                    int errors = 0;
+                    string solutionName = ((ListDisplayItem)selectedSolution).Name;
+                    string solutionZipFileName = solutionName + ".zip";
+                    if (alwaysGetLatestSolutionCheckBox.Checked || !File.Exists(solutionZipFileName) || !Directory.Exists(solutionName))
+                    {
+                        // Export a solution
+                        ExportSolutionRequest exportSolutionRequest = new ExportSolutionRequest();
+                        exportSolutionRequest.Managed = false;
+                        exportSolutionRequest.SolutionName = solutionName;
+
+                        ExportSolutionResponse exportSolutionResponse =
+                           (ExportSolutionResponse)this.Service.Execute(exportSolutionRequest);
+
+                        byte[] exportXml = exportSolutionResponse.ExportSolutionFile;
+                        if (worker.CancellationPending)
+                        {
+                            return;
+                        }
+
+                        if (File.Exists(solutionZipFileName))
+                        {
+                            File.Delete(solutionZipFileName);
+                        }
+                        File.WriteAllBytes(solutionZipFileName, exportXml);
+                        if (Directory.Exists(solutionName))
+                        {
+                            Directory.Delete(solutionName, true);
+                        }
+                        if (worker.CancellationPending)
+                        {
+                            return;
+                        }
+                        ZipFile.ExtractToDirectory(solutionZipFileName, solutionName);
+                        if (worker.CancellationPending)
+                        {
+                            return;
+                        }
+                    }
+                    var files = Directory.GetFiles(solutionName, "*.*", SearchOption.AllDirectories);
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        try
+                        {
+                            string textToSearch = searchTextBox.Text;
+                            double percentage = (double)(i + 1) / (double)files.Length;
+                            percentage *= (double)100;
+                            Thread.Sleep(500);
+                            worker.ReportProgress(Convert.ToInt32(percentage), $"Searching {files[i]}.");
+
+                            if (worker.CancellationPending)
+                            {
+                                return;
+                            }
+                            List<SolutionSearchResult> results = new List<SolutionSearchResult>();
+
+                            if (files[i].EndsWith(".msapp"))
+                            {
+                                var msappUnpackPath = files[i].Replace(".msapp", "");
+                                if (Directory.Exists(solutionName))
+                                {
+                                    Directory.Delete(solutionName, true);
+                                }
+
+                                var canvasDir = Directory.CreateDirectory(msappUnpackPath);
+                                ZipFile.ExtractToDirectory(files[i], msappUnpackPath);
+                                var appFiles = Directory.GetFiles(msappUnpackPath, "*.*", SearchOption.AllDirectories);
+                                foreach(var appFile in appFiles)
+                                {
+                                    searchSolutionObject(appFile, textToSearch, ref results);
+                                }
+                            }
+                            else
+                            {
+                                searchSolutionObject(files[i], textToSearch, ref results);
+                            }
+
+                            recordCount += results.Count;
+                            AddSolutionResultTab(Path.GetFileName(files[i]), results);
+                            fileCount++;
+                        }
+                        catch (Exception e)
+                        {
+                            errors++;
+                            try
+                            {
+                                this.LogError(e.ToString());
+                            }
+                            catch { }
+                            worker.ReportProgress(0, $"Search Completed with Errors. Error Message: " + e.Message);
+                        }
+                    }
+                    if (recordCount == 0)
+                    {
+                        worker.ReportProgress(0, $"Search Complete. No files were found. Make sure you've selected the correct solution to search and that you are using * for wildcard searches otherwise the exact text will be matched.");
+                    }
+                    else
+                    {
+                        worker.ReportProgress(0, $"Search Complete. Found {recordCount} instances in {fileCount} files with {errors} error(s).");
+                    }
+
+                },
+                ProgressChanged = (args) =>
+                {
+                    SetWorkingMessage(args.UserState?.ToString());
+                    SendMessageToStatusBar(this, new StatusBarMessageEventArgs(args.ProgressPercentage, args.UserState.ToString().Replace("\r\n", " ")));
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    this.searchLocationList.Enabled = true;
+                    this.btnFind.Text = "Search";
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show(args.Error.Message, "Oh crap", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+            });
+        }
+
+        private void searchSolutionObject(string filePath, string searchText, ref List<SolutionSearchResult> results)
+        {
+            string regEx = "^" + Regex.Escape(searchText).Replace("\\*", ".*") + "$";
+            var lines = File.ReadLines(filePath)
+                .SkipWhile(line => !line.Contains("CustomerEN"))
+                .Skip(1) // optional
+                .TakeWhile(line => !line.Contains("CustomerCh"));
+            foreach (var line in lines)
+            {
+                results.Add(new SolutionSearchResult() { FileName = Path.GetFileName(filePath), FilePath = filePath, Value = line });
+            }
+        }
         private void searchMetadataObject(EntityMetadata entity, string linkType, string metadataType, object searchObject, string itemIdentifier, string searchText, ref List<MetadataSearchResult> results)
         {
             if (searchObject == null) return;
@@ -404,6 +565,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                             percentage = percentage * (double)100;
 
                             worker.ReportProgress(Convert.ToInt32(percentage), $"Searching for {selectedEntity.LogicalName} records.");
+                 
                             // Retrieve the attribute metadata
                             var req = new RetrieveEntityRequest()
                             {
@@ -668,7 +830,11 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                         catch (Exception e)
                         {
                             errors++;
-                            this.LogError(e.ToString());
+                            try
+                            {
+                                this.LogError(e.ToString());
+                            }
+                            catch { }
                             worker.ReportProgress(0, $"Search Completed with Errors. Error Message: " + e.Message);
                         }
                     }
@@ -689,9 +855,8 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 },
                 PostWorkCallBack = (args) =>
                 {
-                    this.recordSearchRadio.Enabled = true;
-                    this.metadataSearchRadio.Enabled = true;
-                    this.btnFind.Text = "Search Records";
+                    this.searchLocationList.Enabled = true;
+                    this.btnFind.Text = "Search";
                     if (args.Error != null)
                     {
                         MessageBox.Show(args.Error.Message, "Oh crap", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -812,6 +977,42 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             }
         }
 
+        private void AddSolutionResultTab(string directoryName, List<SolutionSearchResult> results)
+        {
+            if (results.Count > 0)
+            {
+                if (this.tabControl1.InvokeRequired)
+                {
+                    AddSolutionTabCallback d = new AddSolutionTabCallback(AddSolutionResultTab);
+                    this.Invoke(d, new object[] { directoryName, results });
+                }
+                else
+                {
+                    DataGridView gridData = new DataGridView();
+                    gridData.AllowUserToAddRows = false;
+                    gridData.AllowUserToDeleteRows = false;
+                    gridData.AllowUserToOrderColumns = true;
+                    gridData.AllowUserToResizeRows = false;
+                    gridData.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+                    gridData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+                    gridData.Dock = System.Windows.Forms.DockStyle.Fill;
+                    gridData.Location = new System.Drawing.Point(8, 38);
+                    gridData.Margin = new System.Windows.Forms.Padding(8, 7, 8, 7);
+                    gridData.Name = "gridData";
+                    gridData.ReadOnly = true;
+                    gridData.RowHeadersVisible = false;
+                    gridData.Size = new System.Drawing.Size(1587, 1090);
+                    gridData.TabIndex = 0;
+                    gridData.CellDoubleClick += gridData_SolutionCellDoubleClick;
+                    gridData.DataSource = results;
+                    gridData.DataBindingComplete += GridData_DataBindingComplete;
+                    TabPage tabPage = new TabPage(directoryName);
+                    tabPage.Controls.Add(gridData);
+                    this.tabControl1.TabPages.Add(tabPage);
+                }
+            }
+        }
+
         private void AddMetadataResultTab(string entityName, List<MetadataSearchResult> results)
         {
             if (results.Count > 0)
@@ -848,6 +1049,18 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             }
         }
 
+        private void gridData_SolutionCellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = ((DataGridView)sender).Rows[e.RowIndex];
+                string filePath = row.Cells[0].Value.ToString();
+                var fullFilePath = Path.GetFullPath(filePath);
+                Process.Start(fullFilePath);
+            }
+        }
+
+
         private void gridData_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -859,6 +1072,13 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             }
         }
 
+        protected override Padding DefaultPadding
+        {
+            get
+            {
+                return new Padding(0, 10, 0, 10);
+            }
+        }
         private void GridData_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
             ((DataGridView)sender).Columns[0].Visible = false;
@@ -952,14 +1172,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
         {
             if (e.KeyCode == Keys.Enter)
             {
-                if (recordSearchRadio.Checked)
-                {
-                    btnFind.PerformClick();
-                }
-                else
-                {
-                    btnFindMetadata.PerformClick();
-                }
+                btnFind.PerformClick();
             }
         }
 
@@ -975,11 +1188,25 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
 
         private void btnFind_Click(object sender, EventArgs e)
         {
-            recordSearchRadio.Enabled = false;
-            metadataSearchRadio.Enabled = false;
-            if (btnFind.Text == "Search Records")
+            if (searchLocationList.SelectedIndex == 0)
             {
-                if(this.EntitiesListView.CheckedEntities.Count == 0)
+                findInRecords();
+            }
+            else if (searchLocationList.SelectedIndex == 1)
+            {
+                findInMetadata();
+            }
+            else if (searchLocationList.SelectedIndex == 2)
+            {
+                findInSolution();
+            }
+        }
+
+        private void findInRecords()
+        {
+            if (btnFind.Text.StartsWith("Search"))
+            {
+                if (this.EntitiesListView.CheckedEntities.Count == 0)
                 {
                     MessageBox.Show("Please select at least one entity to search before continuing.", "No Entities Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
@@ -989,6 +1216,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 }
                 else
                 {
+                    searchLocationList.Enabled = false;
                     btnFind.Text = "Cancel";
                     LoadData(this.EntitiesListView.CheckedEntities);
                 }
@@ -996,17 +1224,40 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             else
             {
                 CancelWorker(); // PluginBaseControl method that calls the Background Workers CancelAsync method.
-                btnFind.Text = "Search Records";
-                recordSearchRadio.Enabled = true;
-                metadataSearchRadio.Enabled = true;
+                btnFind.Text = "Search";
+                searchLocationList.Enabled = true;
+            }
+        }
+        private void findInSolution()
+        {
+            if (btnFind.Text.StartsWith("Search"))
+            {
+                if (this.EntitiesListView.SolutionsDropDown.ComboBox.SelectedItem == null)
+                {
+                    MessageBox.Show("Please select a solution to search before continuing.", "No Solution Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else if (string.IsNullOrEmpty(searchTextBox.Text))
+                {
+                    MessageBox.Show("Please enter your search criteria in the search box. Use asterisks * to perform a wildcard search", "No Search Criteria Entered", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    btnFind.Text = "Cancel";
+                    searchLocationList.Enabled = false;
+                    LoadSolution(this.EntitiesListView.SolutionsDropDown.ComboBox.SelectedItem);
+                }
+            }
+            else
+            {
+                CancelWorker(); // PluginBaseControl method that calls the Background Workers CancelAsync method.
+                btnFind.Text = "Search";
+                searchLocationList.Enabled = true;
             }
         }
 
-        private void btnFindMetadata_Click(object sender, EventArgs e)
+        private void findInMetadata()
         {
-            recordSearchRadio.Enabled = false;
-            metadataSearchRadio.Enabled = false;
-            if (btnFindMetadata.Text == "Search Metadata")
+            if (btnFind.Text.StartsWith("Search"))
             {
                 if (this.EntitiesListView.CheckedEntities.Count == 0)
                 {
@@ -1018,33 +1269,44 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 }
                 else
                 {
-                    btnFindMetadata.Text = "Cancel";
+                    btnFind.Text = "Cancel";
+                    searchLocationList.Enabled = false;
                     LoadMetadata(this.EntitiesListView.CheckedEntities);
                 }
             }
             else
             {
                 CancelWorker(); // PluginBaseControl method that calls the Background Workers CancelAsync method.
-                btnFindMetadata.Text = "Search Metadata";
-                recordSearchRadio.Enabled = true;
-                metadataSearchRadio.Enabled = true;
+                btnFind.Text = "Search";
+                searchLocationList.Enabled = true;
             }
         }
-
-        private void metadataSearchRadio_CheckedChanged(object sender, EventArgs e)
-        {
-            this.updateSearchVisibility();
-        }
-
-        private void recordSearchRadio_CheckedChanged(object sender, EventArgs e)
+        private void SearchLocationList_SelectedIndexChanged(object sender, System.EventArgs e)
         {
             this.updateSearchVisibility();
         }
         private void updateSearchVisibility()
         {
-            recordSearchGroup.Visible = recordSearchRadio.Checked;
-            metadataSearchGroup.Visible = metadataSearchRadio.Checked;
-            resultsGroup.Text = (metadataSearchRadio.Checked) ? "Metadata" : "Records";
+            recordSearchGroup.Visible = (searchLocationList.SelectedIndex == 0);
+            metadataSearchGroup.Visible = (searchLocationList.SelectedIndex == 1);
+            solutionSearchGroup.Visible = (searchLocationList.SelectedIndex == 2);
+            resultsGroup.Text = (searchLocationList.SelectedIndex == 1) ? "Metadata" : (searchLocationList.SelectedIndex == 2) ? "Files" : "Records";
+            btnFind.Text = $"Search {searchLocationList.Text}";
+            if(searchLocationList.SelectedIndex == 2) {
+                EntitiesListView.EntityListView.Visible = false;
+                EntitiesListView.SplitContainerToolbar.Panel1Collapsed = true;
+                EntitiesListView.SolutionsDropDown.SolutionType = CrmActions.SolutionType.Unmanaged;
+                EntitiesListView.SolutionsDropDown.LoadData();
+                this.groupBox1.Text = "Solutions";
+            }
+            else
+            {
+                EntitiesListView.EntityListView.Visible = true;
+                EntitiesListView.SplitContainerToolbar.Panel1Collapsed = false;
+                EntitiesListView.SolutionsDropDown.SolutionType = CrmActions.SolutionType.Both;
+                EntitiesListView.SolutionsDropDown.LoadData();
+                this.groupBox1.Text = "Entities";
+            }
         }
     }
 }
