@@ -8,8 +8,9 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
 {
     public class SolutionSearchResult
     {
+        public string FileLink { get; set; }
+        public int LineNumber { get; set; }
         public string FilePath { get; set; }
-        public string FileName { get; set; }
         public string Value { get; set; }
     }
 }

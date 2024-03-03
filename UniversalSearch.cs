@@ -8,6 +8,7 @@ using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Organization;
 using Microsoft.Xrm.Sdk.Query;
 using MikeFactorial.XTB.Plugins.Xsd;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,9 +18,12 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Linq;
 using xrmtb.XrmToolBox.Controls;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Args;
@@ -40,17 +44,8 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             InitializeComponent();
             EntitiesListView.SolutionsDropDown.ComboBox.DropDownWidth = 400;
             EntitiesListView.SolutionsDropDown.ComboBox.DropDownHeight = 300;
-            EntitiesListView.SolutionsDropDown.ComboBox.DataSourceChanged += SolutionsDropDown_DataSourceChanged;
+            EntitiesListView.SplitContainerToolbar.SplitterDistance = (int)(EntitiesListView.SplitContainerToolbar.ClientSize.Width * .4);
             EntitiesListView.SortList(0, SortOrder.Ascending);
-        }
-
-        private void SolutionsDropDown_DataSourceChanged(object sender, EventArgs e)
-        {
-            if (EntitiesListView.SolutionsDropDown != null && EntitiesListView.SolutionsDropDown.ComboBox.DataSource != null)
-            {
-                //var defaultSolution = ((List<ListDisplayItem>)EntitiesListView.SolutionsDropDown.DataSource).FirstOrDefault(i => i.Name.ToLower() == "default");
-                //EntitiesListView.SolutionsDropDown.SelectedItem = defaultSolution;
-            }
         }
 
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
@@ -283,7 +278,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                     this.btnFind.Text = "Search";
                     if (args.Error != null)
                     {
-                        MessageBox.Show(args.Error.Message, "Oh crap", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(args.Error.Message, "Uh oh.", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
@@ -367,6 +362,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
 
                                 var canvasDir = Directory.CreateDirectory(msappUnpackPath);
                                 ZipFile.ExtractToDirectory(files[i], msappUnpackPath);
+
                                 var appFiles = Directory.GetFiles(msappUnpackPath, "*.*", SearchOption.AllDirectories);
                                 foreach(var appFile in appFiles)
                                 {
@@ -377,7 +373,6 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                             {
                                 searchSolutionObject(files[i], textToSearch, ref results);
                             }
-
                             recordCount += results.Count;
                             AddSolutionResultTab(Path.GetFileName(files[i]), results);
                             fileCount++;
@@ -414,7 +409,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                     this.btnFind.Text = "Search";
                     if (args.Error != null)
                     {
-                        MessageBox.Show(args.Error.Message, "Oh crap", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(args.Error.Message, "Uh oh.", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
@@ -423,12 +418,35 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
 
         private void searchSolutionObject(string filePath, string searchText, ref List<SolutionSearchResult> results)
         {
-            string regEx = "^" + Regex.Escape(searchText).Replace("\\*", ".*") + "$";
-            foreach (var line in File.ReadLines(filePath))
+            //Format xml documents first
+            if (filePath.Contains(".xml"))
             {
-                if (System.Text.RegularExpressions.Regex.IsMatch(line, regEx))
+                // Load the XML file
+                XDocument doc = XDocument.Load(filePath);
+                // Format the XML with indents and line breaks
+                string formattedXml = doc.ToString();
+
+                // Write the formatted XML to a new file
+                File.WriteAllText(filePath, formattedXml);
+            }
+            else if (filePath.Contains(".json"))
+            {
+                // Read the JSON file into a string
+                string json = File.ReadAllText(filePath);
+                // Parse the string into a JObject
+                JObject parsedJson = JObject.Parse(json);
+                // Format the JSON with indents and line breaks
+                string formattedJson = parsedJson.ToString(Newtonsoft.Json.Formatting.Indented);
+                // Write the formatted JSON to a new file
+                File.WriteAllText(filePath, formattedJson);
+            }
+            var regEx = "^" + Regex.Escape(searchText).Replace("\\*", ".*") + "$";
+            var lines = File.ReadLines(filePath).ToList();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if ((!solutionMatchCaseCheckBox.Checked && Regex.IsMatch(lines[i], regEx, RegexOptions.IgnoreCase)) || (solutionMatchCaseCheckBox.Checked && Regex.IsMatch(lines[i], regEx)))
                 {
-                    results.Add(new SolutionSearchResult() { FileName = Path.GetFileName(filePath), FilePath = filePath, Value = line });
+                    results.Add(new SolutionSearchResult() { FileLink = filePath, LineNumber = (i+1), FilePath = filePath, Value = lines[i] });
                 }
             }
         }
@@ -858,7 +876,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                     this.btnFind.Text = "Search";
                     if (args.Error != null)
                     {
-                        MessageBox.Show(args.Error.Message, "Oh crap", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(args.Error.Message, "Uh oh.", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }

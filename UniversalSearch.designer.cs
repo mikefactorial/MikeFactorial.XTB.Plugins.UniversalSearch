@@ -38,6 +38,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             this.searchLookupText = new System.Windows.Forms.CheckBox();
             this.searchOptionSetText = new System.Windows.Forms.CheckBox();
             this.matchCaseCheckBox = new System.Windows.Forms.CheckBox();
+            this.solutionMatchCaseCheckBox = new System.Windows.Forms.CheckBox();
             this.alwaysGetLatestSolutionCheckBox = new System.Windows.Forms.CheckBox();
             this.btnFind = new System.Windows.Forms.Button();
             this.searchLocationList = new System.Windows.Forms.ComboBox();
@@ -182,6 +183,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             // 
             // solutionSearchGroup
             // 
+            this.solutionSearchGroup.Controls.Add(this.solutionMatchCaseCheckBox);
             this.solutionSearchGroup.Controls.Add(this.alwaysGetLatestSolutionCheckBox);
             this.solutionSearchGroup.Location = new System.Drawing.Point(9, 50);
             this.solutionSearchGroup.Name = "solutionSearchGroup";
@@ -290,14 +292,25 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             this.matchCaseCheckBox.Text = "Match Case (slow)";
             this.matchCaseCheckBox.UseVisualStyleBackColor = true;
             // 
+            // solutionMatchCaseCheckBox
+            // 
+            this.solutionMatchCaseCheckBox.AutoSize = true;
+            this.solutionMatchCaseCheckBox.Location = new System.Drawing.Point(6, 10);
+            this.solutionMatchCaseCheckBox.Name = "solutionMatchCaseCheckBox";
+            this.solutionMatchCaseCheckBox.Size = new System.Drawing.Size(90, 17);
+            this.solutionMatchCaseCheckBox.TabIndex = 8;
+            this.solutionMatchCaseCheckBox.Text = "Match Case";
+            this.solutionMatchCaseCheckBox.UseVisualStyleBackColor = true;
+            // 
             // alwaysGetLatestSolutionCheckBox
             // 
             this.alwaysGetLatestSolutionCheckBox.AutoSize = true;
-            this.alwaysGetLatestSolutionCheckBox.Location = new System.Drawing.Point(6, 10);
+            this.alwaysGetLatestSolutionCheckBox.Location = new System.Drawing.Point(100, 10);
             this.alwaysGetLatestSolutionCheckBox.Name = "alwaysGetLatestSolutionCheckBox";
             this.alwaysGetLatestSolutionCheckBox.Size = new System.Drawing.Size(113, 17);
             this.alwaysGetLatestSolutionCheckBox.TabIndex = 8;
-            this.alwaysGetLatestSolutionCheckBox.Text = "Alway export latest solution version";
+            this.alwaysGetLatestSolutionCheckBox.Text = "Export Latest Solution";
+            this.alwaysGetLatestSolutionCheckBox.Checked = true;
             this.alwaysGetLatestSolutionCheckBox.UseVisualStyleBackColor = true;
             this.alwaysGetLatestSolutionCheckBox.UseVisualStyleBackColor = true;
             // 
@@ -376,6 +389,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
         private System.Windows.Forms.ComboBox searchLocationList;
         private System.Windows.Forms.GroupBox recordSearchGroup;
         private System.Windows.Forms.CheckBox matchCaseCheckBox;
+        private System.Windows.Forms.CheckBox solutionMatchCaseCheckBox;
         private System.Windows.Forms.CheckBox alwaysGetLatestSolutionCheckBox;
         private System.Windows.Forms.Button btnFind;
         private System.Windows.Forms.CheckBox searchLookupText;
