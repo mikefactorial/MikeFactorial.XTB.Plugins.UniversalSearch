@@ -360,9 +360,9 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                             if (files[i].EndsWith(".msapp"))
                             {
                                 var msappUnpackPath = files[i].Replace(".msapp", "");
-                                if (Directory.Exists(solutionName))
+                                if (Directory.Exists(msappUnpackPath))
                                 {
-                                    Directory.Delete(solutionName, true);
+                                    Directory.Delete(msappUnpackPath, true);
                                 }
 
                                 var canvasDir = Directory.CreateDirectory(msappUnpackPath);
@@ -424,13 +424,12 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
         private void searchSolutionObject(string filePath, string searchText, ref List<SolutionSearchResult> results)
         {
             string regEx = "^" + Regex.Escape(searchText).Replace("\\*", ".*") + "$";
-            var lines = File.ReadLines(filePath)
-                .SkipWhile(line => !line.Contains("CustomerEN"))
-                .Skip(1) // optional
-                .TakeWhile(line => !line.Contains("CustomerCh"));
-            foreach (var line in lines)
+            foreach (var line in File.ReadLines(filePath))
             {
-                results.Add(new SolutionSearchResult() { FileName = Path.GetFileName(filePath), FilePath = filePath, Value = line });
+                if (System.Text.RegularExpressions.Regex.IsMatch(line, regEx))
+                {
+                    results.Add(new SolutionSearchResult() { FileName = Path.GetFileName(filePath), FilePath = filePath, Value = line });
+                }
             }
         }
         private void searchMetadataObject(EntityMetadata entity, string linkType, string metadataType, object searchObject, string itemIdentifier, string searchText, ref List<MetadataSearchResult> results)
