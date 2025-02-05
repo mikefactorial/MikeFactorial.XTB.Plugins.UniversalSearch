@@ -1,0 +1,405 @@
+﻿using System.Windows.Forms;
+
+namespace MikeFactorial.XTB.Plugins.UniversalSearch
+{
+    partial class UniversalSearch
+    {
+        private System.ComponentModel.IContainer components = null;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        private void InitializeComponent()
+        {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UniversalSearch));
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.EntitiesListView = new xrmtb.XrmToolBox.Controls.EntitiesListControl();
+            this.resultsGroup = new System.Windows.Forms.GroupBox();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.searchTextBox = new System.Windows.Forms.TextBox();
+            this.metadataSearchGroup = new System.Windows.Forms.GroupBox();
+            this.solutionSearchGroup = new System.Windows.Forms.GroupBox();
+            this.matchCaseMetadata = new System.Windows.Forms.CheckBox();
+            this.searchRelationships = new System.Windows.Forms.CheckBox();
+            this.searchFormsViews = new System.Windows.Forms.CheckBox();
+            this.searchAttributes = new System.Windows.Forms.CheckBox();
+            this.searchEntities = new System.Windows.Forms.CheckBox();
+            this.recordSearchGroup = new System.Windows.Forms.GroupBox();
+            this.searchLookupText = new System.Windows.Forms.CheckBox();
+            this.searchOptionSetText = new System.Windows.Forms.CheckBox();
+            this.matchCaseCheckBox = new System.Windows.Forms.CheckBox();
+            this.solutionMatchCaseCheckBox = new System.Windows.Forms.CheckBox();
+            this.alwaysGetLatestSolutionCheckBox = new System.Windows.Forms.CheckBox();
+            this.btnFind = new System.Windows.Forms.Button();
+            this.searchLocationList = new System.Windows.Forms.ComboBox();
+            this.searchTextToolTip = new System.Windows.Forms.ToolTip(this.components);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.resultsGroup.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.metadataSearchGroup.SuspendLayout();
+            this.solutionSearchGroup.SuspendLayout();
+            this.recordSearchGroup.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.groupBox1);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.resultsGroup);
+            this.splitContainer1.Panel2.Controls.Add(this.groupBox3);
+            this.splitContainer1.Size = new System.Drawing.Size(1050, 537);
+            this.splitContainer1.SplitterDistance = 284;
+            this.splitContainer1.TabIndex = 5;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.EntitiesListView);
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox1.Location = new System.Drawing.Point(0, 0);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(284, 537);
+            this.groupBox1.TabIndex = 2;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Entities";
+            // 
+            // EntitiesListView
+            // 
+            this.EntitiesListView.AutoLoadData = true;
+            this.EntitiesListView.AutosizeColumns = System.Windows.Forms.ColumnHeaderAutoResizeStyle.None;
+            this.EntitiesListView.Checkboxes = true;
+            this.EntitiesListView.DisplaySolutionDropdown = true;
+            this.EntitiesListView.DisplayToolbar = true;
+            this.EntitiesListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.EntitiesListView.EntityTypes = xrmtb.XrmToolBox.Controls.EnumEntityTypes.BothCustomAndSystem;
+            this.EntitiesListView.LanguageCode = 1033;
+            this.EntitiesListView.ListViewColDefs = new xrmtb.XrmToolBox.Controls.ListViewColumnDef[] {
+        ((xrmtb.XrmToolBox.Controls.ListViewColumnDef)(resources.GetObject("EntitiesListView.ListViewColDefs"))),
+        ((xrmtb.XrmToolBox.Controls.ListViewColumnDef)(resources.GetObject("EntitiesListView.ListViewColDefs1"))),
+        ((xrmtb.XrmToolBox.Controls.ListViewColumnDef)(resources.GetObject("EntitiesListView.ListViewColDefs2"))),
+        ((xrmtb.XrmToolBox.Controls.ListViewColumnDef)(resources.GetObject("EntitiesListView.ListViewColDefs3"))),
+        ((xrmtb.XrmToolBox.Controls.ListViewColumnDef)(resources.GetObject("EntitiesListView.ListViewColDefs4")))};
+            this.EntitiesListView.Location = new System.Drawing.Point(3, 16);
+            this.EntitiesListView.Margin = new System.Windows.Forms.Padding(8, 7, 8, 7);
+            this.EntitiesListView.Name = "EntitiesListView";
+            this.EntitiesListView.RetrieveAsIfPublished = true;
+            this.EntitiesListView.Service = null;
+            this.EntitiesListView.Size = new System.Drawing.Size(278, 518);
+            this.EntitiesListView.SolutionFilter = null;
+            this.EntitiesListView.TabIndex = 1;
+            // 
+            // resultsGroup
+            // 
+            this.resultsGroup.Controls.Add(this.tabControl1);
+            this.resultsGroup.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.resultsGroup.Location = new System.Drawing.Point(0, 82);
+            this.resultsGroup.Name = "resultsGroup";
+            this.resultsGroup.Size = new System.Drawing.Size(762, 455);
+            this.resultsGroup.TabIndex = 3;
+            this.resultsGroup.TabStop = false;
+            this.resultsGroup.Text = "Records";
+            // 
+            // tabControl1
+            // 
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(3, 16);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(1);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(756, 436);
+            this.tabControl1.TabIndex = 0;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.groupBox2);
+            this.groupBox3.Controls.Add(this.metadataSearchGroup);
+            this.groupBox3.Controls.Add(this.recordSearchGroup);
+            this.groupBox3.Controls.Add(this.solutionSearchGroup);
+            this.groupBox3.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBox3.Location = new System.Drawing.Point(0, 0);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(762, 82);
+            this.groupBox3.TabIndex = 2;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Search Criteria (Use asterisks * to perform a wildcard search)";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.searchTextBox);
+            this.groupBox2.Controls.Add(this.searchLocationList);
+            this.groupBox2.Controls.Add(this.btnFind);
+            this.groupBox2.Location = new System.Drawing.Point(10, 14);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(740, 43);
+            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabStop = false;
+            // 
+            // searchTextBox
+            // 
+            this.searchTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchTextBox.Location = new System.Drawing.Point(3, 16);
+            this.searchTextBox.Margin = new System.Windows.Forms.Padding(1);
+            this.searchTextBox.Name = "searchTextBox";
+            this.searchTextBox.Size = new System.Drawing.Size(516, 20);
+            this.searchTextBox.TabIndex = 5;
+            this.searchTextToolTip.SetToolTip(this.searchTextBox, "Enter the value to search. Use wildcard (*) to perform a wildcard search.");
+            // 
+            // metadataSearchGroup
+            // 
+            this.metadataSearchGroup.Controls.Add(this.matchCaseMetadata);
+            this.metadataSearchGroup.Controls.Add(this.searchRelationships);
+            this.metadataSearchGroup.Controls.Add(this.searchFormsViews);
+            this.metadataSearchGroup.Controls.Add(this.searchAttributes);
+            this.metadataSearchGroup.Controls.Add(this.searchEntities);
+            this.metadataSearchGroup.Location = new System.Drawing.Point(9, 50);
+            this.metadataSearchGroup.Name = "metadataSearchGroup";
+            this.metadataSearchGroup.Size = new System.Drawing.Size(740, 32);
+            this.metadataSearchGroup.TabIndex = 11;
+            this.metadataSearchGroup.TabStop = false;
+            this.metadataSearchGroup.Visible = false;
+            // 
+            // solutionSearchGroup
+            // 
+            this.solutionSearchGroup.Controls.Add(this.solutionMatchCaseCheckBox);
+            this.solutionSearchGroup.Controls.Add(this.alwaysGetLatestSolutionCheckBox);
+            this.solutionSearchGroup.Location = new System.Drawing.Point(9, 50);
+            this.solutionSearchGroup.Name = "solutionSearchGroup";
+            this.solutionSearchGroup.Size = new System.Drawing.Size(740, 32);
+            this.solutionSearchGroup.TabIndex = 11;
+            this.solutionSearchGroup.TabStop = false;
+            this.solutionSearchGroup.Visible = false;
+
+            // 
+            // matchCaseMetadata
+            // 
+            this.matchCaseMetadata.AutoSize = true;
+            this.matchCaseMetadata.Location = new System.Drawing.Point(7, 9);
+            this.matchCaseMetadata.Name = "matchCaseMetadata";
+            this.matchCaseMetadata.Size = new System.Drawing.Size(83, 17);
+            this.matchCaseMetadata.TabIndex = 12;
+            this.matchCaseMetadata.Text = "Match Case";
+            this.matchCaseMetadata.UseVisualStyleBackColor = true;
+            // 
+            // searchRelationships
+            // 
+            this.searchRelationships.AutoSize = true;
+            this.searchRelationships.Checked = true;
+            this.searchRelationships.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.searchRelationships.Location = new System.Drawing.Point(326, 10);
+            this.searchRelationships.Name = "searchRelationships";
+            this.searchRelationships.Size = new System.Drawing.Size(126, 17);
+            this.searchRelationships.TabIndex = 11;
+            this.searchRelationships.Text = "Search Relationships";
+            this.searchRelationships.UseVisualStyleBackColor = true;
+            // 
+            // searchFormsViews
+            // 
+            this.searchFormsViews.AutoSize = true;
+            this.searchFormsViews.Checked = true;
+            this.searchFormsViews.Location = new System.Drawing.Point(463, 10);
+            this.searchFormsViews.Name = "searchFormsViews";
+            this.searchFormsViews.Size = new System.Drawing.Size(143, 17);
+            this.searchFormsViews.TabIndex = 10;
+            this.searchFormsViews.Text = "Search Forms and Views";
+            this.searchFormsViews.UseVisualStyleBackColor = true;
+            // 
+            // searchAttributes
+            // 
+            this.searchAttributes.AutoSize = true;
+            this.searchAttributes.Checked = true;
+            this.searchAttributes.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.searchAttributes.Location = new System.Drawing.Point(207, 9);
+            this.searchAttributes.Name = "searchAttributes";
+            this.searchAttributes.Size = new System.Drawing.Size(107, 17);
+            this.searchAttributes.TabIndex = 9;
+            this.searchAttributes.Text = "Search Attributes";
+            this.searchAttributes.UseVisualStyleBackColor = true;
+            // 
+            // searchEntities
+            // 
+            this.searchEntities.AutoSize = true;
+            this.searchEntities.Checked = true;
+            this.searchEntities.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.searchEntities.Location = new System.Drawing.Point(102, 10);
+            this.searchEntities.Name = "searchEntities";
+            this.searchEntities.Size = new System.Drawing.Size(95, 17);
+            this.searchEntities.TabIndex = 8;
+            this.searchEntities.Text = "Search Entites";
+            this.searchEntities.UseVisualStyleBackColor = true;
+
+            // 
+            // recordSearchGroup
+            // 
+            this.recordSearchGroup.Controls.Add(this.searchLookupText);
+            this.recordSearchGroup.Controls.Add(this.searchOptionSetText);
+            this.recordSearchGroup.Controls.Add(this.matchCaseCheckBox);
+            this.recordSearchGroup.Location = new System.Drawing.Point(10, 50);
+            this.recordSearchGroup.Name = "recordSearchGroup";
+            this.recordSearchGroup.Size = new System.Drawing.Size(740, 32);
+            this.recordSearchGroup.TabIndex = 7;
+            this.recordSearchGroup.TabStop = false;
+            // 
+            // searchLookupText
+            // 
+            this.searchLookupText.AutoSize = true;
+            this.searchLookupText.Location = new System.Drawing.Point(373, 10);
+            this.searchLookupText.Name = "searchLookupText";
+            this.searchLookupText.Size = new System.Drawing.Size(167, 17);
+            this.searchLookupText.TabIndex = 10;
+            this.searchLookupText.Text = "Search Lookup Text (slowest)";
+            this.searchLookupText.UseVisualStyleBackColor = true;
+            // 
+            // searchOptionSetText
+            // 
+            this.searchOptionSetText.AutoSize = true;
+            this.searchOptionSetText.Location = new System.Drawing.Point(171, 9);
+            this.searchOptionSetText.Name = "searchOptionSetText";
+            this.searchOptionSetText.Size = new System.Drawing.Size(159, 17);
+            this.searchOptionSetText.TabIndex = 9;
+            this.searchOptionSetText.Text = "Search Picklist Text (slower)";
+            this.searchOptionSetText.UseVisualStyleBackColor = true;
+            // 
+            // matchCaseCheckBox
+            // 
+            this.matchCaseCheckBox.AutoSize = true;
+            this.matchCaseCheckBox.Location = new System.Drawing.Point(6, 10);
+            this.matchCaseCheckBox.Name = "matchCaseCheckBox";
+            this.matchCaseCheckBox.Size = new System.Drawing.Size(113, 17);
+            this.matchCaseCheckBox.TabIndex = 8;
+            this.matchCaseCheckBox.Text = "Match Case (slow)";
+            this.matchCaseCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // solutionMatchCaseCheckBox
+            // 
+            this.solutionMatchCaseCheckBox.AutoSize = true;
+            this.solutionMatchCaseCheckBox.Location = new System.Drawing.Point(6, 10);
+            this.solutionMatchCaseCheckBox.Name = "solutionMatchCaseCheckBox";
+            this.solutionMatchCaseCheckBox.Size = new System.Drawing.Size(90, 17);
+            this.solutionMatchCaseCheckBox.TabIndex = 8;
+            this.solutionMatchCaseCheckBox.Text = "Match Case";
+            this.solutionMatchCaseCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // alwaysGetLatestSolutionCheckBox
+            // 
+            this.alwaysGetLatestSolutionCheckBox.AutoSize = true;
+            this.alwaysGetLatestSolutionCheckBox.Location = new System.Drawing.Point(100, 10);
+            this.alwaysGetLatestSolutionCheckBox.Name = "alwaysGetLatestSolutionCheckBox";
+            this.alwaysGetLatestSolutionCheckBox.Size = new System.Drawing.Size(113, 17);
+            this.alwaysGetLatestSolutionCheckBox.TabIndex = 8;
+            this.alwaysGetLatestSolutionCheckBox.Text = "Export Latest Solution";
+            this.alwaysGetLatestSolutionCheckBox.Checked = true;
+            this.alwaysGetLatestSolutionCheckBox.UseVisualStyleBackColor = true;
+            this.alwaysGetLatestSolutionCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // btnFind
+            // 
+            this.btnFind.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnFind.Location = new System.Drawing.Point(630, 16);
+            this.btnFind.Name = "btnFind";
+            this.btnFind.Size = new System.Drawing.Size(100, 21);
+            this.btnFind.TabIndex = 7;
+            this.btnFind.Text = "Search Records";
+            this.btnFind.UseVisualStyleBackColor = true;
+            this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
+            // 
+            // searchTextToolTip
+            // 
+            this.searchTextToolTip.AutoPopDelay = 1000;
+            this.searchTextToolTip.InitialDelay = 500;
+            this.searchTextToolTip.ReshowDelay = 100;
+            // 
+            // searchLocationList
+            // 
+            this.searchLocationList.FormattingEnabled = true;
+            this.searchLocationList.Items.AddRange(new object[] {
+        "Records",
+        "Metadata",
+        "Solution"});
+            this.searchLocationList.SelectedIndex = 0;
+            this.searchLocationList.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.searchLocationList.Location = new System.Drawing.Point(523, 16);
+            this.searchLocationList.Name = "searchLocationList";
+            this.searchLocationList.Size = new System.Drawing.Size(100, 21);
+            this.searchLocationList.TabIndex = 8;
+            this.searchLocationList.DropDownWidth = 250;
+            this.searchLocationList.SelectedIndexChanged += SearchLocationList_SelectedIndexChanged;
+
+            // 
+            // UniversalSearch
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.splitContainer1);
+            this.Name = "UniversalSearch";
+            this.PluginIcon = ((System.Drawing.Icon)(resources.GetObject("$this.PluginIcon")));
+            this.Size = new System.Drawing.Size(1050, 537);
+            this.TabIcon = ((System.Drawing.Image)(resources.GetObject("$this.TabIcon")));
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.resultsGroup.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            this.solutionSearchGroup.ResumeLayout(false);
+            this.solutionSearchGroup.PerformLayout();
+            this.metadataSearchGroup.ResumeLayout(false);
+            this.metadataSearchGroup.PerformLayout();
+            this.recordSearchGroup.ResumeLayout(false);
+            this.recordSearchGroup.PerformLayout();
+            this.ResumeLayout(false);
+
+        }
+
+
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private xrmtb.XrmToolBox.Controls.EntitiesListControl EntitiesListView;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox resultsGroup;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.TextBox searchTextBox;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.ToolTip searchTextToolTip;
+        private System.Windows.Forms.ComboBox searchLocationList;
+        private System.Windows.Forms.GroupBox recordSearchGroup;
+        private System.Windows.Forms.CheckBox matchCaseCheckBox;
+        private System.Windows.Forms.CheckBox solutionMatchCaseCheckBox;
+        private System.Windows.Forms.CheckBox alwaysGetLatestSolutionCheckBox;
+        private System.Windows.Forms.Button btnFind;
+        private System.Windows.Forms.CheckBox searchLookupText;
+        private System.Windows.Forms.CheckBox searchOptionSetText;
+        private System.Windows.Forms.GroupBox solutionSearchGroup;
+        private System.Windows.Forms.GroupBox metadataSearchGroup;
+        private System.Windows.Forms.CheckBox searchFormsViews;
+        private System.Windows.Forms.CheckBox searchAttributes;
+        private System.Windows.Forms.CheckBox searchEntities;
+        private System.Windows.Forms.CheckBox searchRelationships;
+        private System.Windows.Forms.CheckBox matchCaseMetadata;
+    }
+}
