@@ -5,6 +5,8 @@ VisualStudioVersion = 17.12.35707.178 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MikeFactorial.XTB.Plugins.UniversalSearch", "MikeFactorial.XTB.Plugins.UniversalSearch.csproj", "{DE437E99-A402-4FE3-8CAC-944FF3F57904}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XrmToolBox.Controls", "xrmtb.XrmToolBox.Controls\XrmToolBox.Controls\XrmToolBox.Controls.csproj", "{F4093354-8269-47A6-817C-2E84986412E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,11 +17,18 @@ Global
 		{DE437E99-A402-4FE3-8CAC-944FF3F57904}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE437E99-A402-4FE3-8CAC-944FF3F57904}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE437E99-A402-4FE3-8CAC-944FF3F57904}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4093354-8269-47A6-817C-2E84986412E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4093354-8269-47A6-817C-2E84986412E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4093354-8269-47A6-817C-2E84986412E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4093354-8269-47A6-817C-2E84986412E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D33CE2F-DBC2-42DA-AECA-EB2ADFD119A3}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		xrmtb.XrmToolBox.Controls\DataGridViewGrouper\DataGridViewGrouper.projitems*{f4093354-8269-47a6-817c-2e84986412e3}*SharedItemsImports = 4
 	EndGlobalSection
 EndGlobal

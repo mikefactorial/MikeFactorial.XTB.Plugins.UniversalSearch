@@ -1,4 +1,13 @@
-# MikeFactorial.XTB.Plugins.UniversalSearch
-This tool will allow you to search across all records in Dynamics 365 for a specific value or wildcard values in XrmToolBox. Documentation can be found here https://mikefactorial.com/dynamics-365-universal-search-for-xrmtoolbox/
+# xrmtb.XrmToolBox.Controls
 
-The latest release allows you to search metadata as well as data in D365/CDS. See the link above for details.
+A collection of WinForm (yes, the good old WinForm!) controls for development connecting to a Microsoft Dataverse backend.
+
+If you're creating [XrmToolBox](https://www.xrmtoolbox.com) tools without this collection you are just working too hard. ™
+
+# Nuget
+
+Published at https://www.nuget.org/packages/xrmtb.XrmToolBox.Controls/
+
+# Creators
+
+Mainly maintained by [James Novak](https://github.com/jamesnovak) and [Jonas Rapp](https://github.com/rappen).
