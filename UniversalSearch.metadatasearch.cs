@@ -220,6 +220,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 PostWorkCallBack = (args) =>
                 {
                     this.searchLocationList.Enabled = true;
+                    this.openInExcelToolStripMenuItem.Enabled = (tabControl1.TabPages.Count > 0);
                     this.btnFind.Text = "Search";
                     if (args.Error != null)
                     {
@@ -350,16 +351,18 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 }
                 else
                 {
-                    btnFind.Text = "Cancel";
-                    searchLocationList.Enabled = false;
+                    this.btnFind.Text = "Cancel";
+                    this.searchLocationList.Enabled = false;
+                    this.openInExcelToolStripMenuItem.Enabled = false;
                     LoadMetadata(this.EntitiesListView.CheckedEntities);
                 }
             }
             else
             {
                 CancelWorker(); // PluginBaseControl method that calls the Background Workers CancelAsync method.
-                btnFind.Text = "Search";
-                searchLocationList.Enabled = true;
+                this.btnFind.Text = "Search";
+                this.searchLocationList.Enabled = true;
+                this.openInExcelToolStripMenuItem.Enabled = (tabControl1.TabPages.Count > 0);
             }
         }
 

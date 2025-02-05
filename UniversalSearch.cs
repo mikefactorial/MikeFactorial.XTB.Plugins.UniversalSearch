@@ -1,4 +1,5 @@
 ﻿using McTools.Xrm.Connection;
+using Microsoft.Office.Interop.Excel;
 using Microsoft.VisualBasic.CompilerServices;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -42,11 +43,11 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
         delegate void AddMetadataTabCallback(string entityName, List<MetadataSearchResult> results);
         delegate void AddSolutionTabCallback(string directoryName, List<SolutionSearchResult> results);
 
-        public CheckBox CheckBoxCheckAllNone
+        public System.Windows.Forms.CheckBox CheckBoxCheckAllNone
         {
             get
             {
-                return this.Controls.Find("checkBoxCheckAllNone", true).ToList().FirstOrDefault() as CheckBox;
+                return this.Controls.Find("checkBoxCheckAllNone", true).ToList().FirstOrDefault() as System.Windows.Forms.CheckBox;
             }
         }
         public ListView EntityListView
@@ -327,6 +328,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
 
         private void btnFind_Click(object sender, EventArgs e)
         {
+            openInExcelToolStripMenuItem.Enabled = false;
             if (searchLocationList.SelectedIndex == 0)
             {
                 findInRecords();
@@ -387,6 +389,78 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 this.SolutionsDropDown.LoadData();
                 this.groupBox1.Text = "Entities";
             }
+        }
+
+        private void openInExcelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Cursor = Cursors.WaitCursor;
+                openInExcelToolStripMenuItem.Enabled = false;
+                var xlexcel = new Microsoft.Office.Interop.Excel.Application();
+                xlexcel.Visible = true;
+                var xlWorkBook = xlexcel.Workbooks.Add(System.Reflection.Missing.Value);
+                int worksheetNumber = 0;
+                dynamic xlResultSheet = null;
+                foreach (TabPage tabPage in this.tabControl1.TabPages)
+                {
+                    foreach (var control in tabPage.Controls)
+                    {
+                        if (control is xrmtb.XrmToolBox.Controls.CRMGridView gridData)
+                        {
+                            worksheetNumber++;
+                            var tempCopyMode = gridData.ClipboardCopyMode;
+                            gridData.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+                            gridData.SelectAll();
+                            var dataObj = gridData.GetClipboardContent();
+                            gridData.ClearSelection();
+                            if (dataObj == null)
+                            {
+                                return;
+                            }
+                            Clipboard.SetDataObject(dataObj);
+
+                            // Create sheet for results
+                            if (worksheetNumber == 1) 
+                            {
+                                xlResultSheet = (Worksheet)xlWorkBook.Worksheets.get_Item(1);
+                            }
+                            else
+                            {
+                                xlResultSheet = (Worksheet)xlWorkBook.Worksheets.Add(Type.Missing, (Worksheet)xlResultSheet, Type.Missing, Type.Missing);
+                            }
+                            xlResultSheet.Name = tabPage.Text;
+                            // Paste all data
+                            var cellResultA1 = (Range)xlResultSheet.Cells[1, 1];
+                            cellResultA1.Select();
+                            xlResultSheet.PasteSpecial(cellResultA1, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, true);
+                            // Format width and headers
+                            var header = (Range)xlResultSheet.Rows[1];
+                            header.Font.Bold = true;
+                            header.Borders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+                            header.Borders[XlBordersIndex.xlEdgeBottom].Weight = XlBorderWeight.xlThick;
+                            header.AutoFilter(1, Type.Missing, XlAutoFilterOperator.xlAnd, Type.Missing, true);
+                            xlResultSheet.Activate();
+                            xlResultSheet.Application.ActiveWindow.SplitRow = 1;
+                            try { xlResultSheet.Application.ActiveWindow.FreezePanes = true; } catch { }
+                            xlResultSheet.Columns.AutoFit();
+                        }
+                    }
+                }
+                xlResultSheet = (Worksheet)xlWorkBook.Worksheets.get_Item(1);
+                xlResultSheet.Activate();
+                xlResultSheet.Range["A1", "A1"].Select();
+            }
+            catch (Exception ex)
+            {
+                //this.ShowErrorDialog(ex, "Open Excel");
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
+                openInExcelToolStripMenuItem.Enabled = true;
+            }
+
         }
     }
 }
