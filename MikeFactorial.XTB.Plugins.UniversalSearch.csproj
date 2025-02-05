@@ -288,6 +288,12 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="xrmtb.XrmToolBox.Controls\XrmToolBox.Controls\XrmToolBox.Controls.csproj">
+      <Project>{f4093354-8269-47a6-817c-2e84986412e3}</Project>
+      <Name>XrmToolBox.Controls</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>IF $(ConfigurationName) == Debug (
