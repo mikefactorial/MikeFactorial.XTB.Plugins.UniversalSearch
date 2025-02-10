@@ -354,7 +354,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 }
                 else
                 {
-                    DataGridView gridData = new DataGridView();
+                    DataGridView gridData = new ResultsDataGridView();
                     gridData.AllowUserToAddRows = false;
                     gridData.AllowUserToDeleteRows = false;
                     gridData.AllowUserToOrderColumns = true;

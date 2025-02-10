@@ -21,6 +21,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
 {
     public partial class UniversalSearch : PluginControlBase, IStatusBarMessenger, IAboutPlugin, IGitHubPlugin, IHelpPlugin
     {
+        private string mostRecentSearchText = "";
         public string RepositoryName => "MikeFactorial.XTB.Plugins.UniversalSearch";
 
         public string UserName => "mikefactorial";
@@ -84,7 +85,9 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             if (this.SolutionsDropDown != null && this.SolutionDropDownComboBox.DataSource != null)
             {
                 var defaultSolution = ((List<ListDisplayItem>)this.SolutionDropDownComboBox.DataSource).FirstOrDefault(i => i.Name.ToLower() == "default");
+                this.SolutionDropDownComboBox.SelectedIndex = -1;
                 this.SolutionDropDownComboBox.SelectedItem = defaultSolution;
+                this.SolutionDropDownComboBox.Text = defaultSolution.DisplayName;
             }
         }
         protected override void OnLoad(EventArgs e)
@@ -191,12 +194,13 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 {
                     if (collection.Entities.Count > 0)
                     {
-                        xrmtb.XrmToolBox.Controls.CRMGridView gridData = new xrmtb.XrmToolBox.Controls.CRMGridView();
+                        ResultsCrmGridView gridData = new ResultsCrmGridView();
                         gridData.ShowLocalTimes = false;
                         gridData.AllowUserToAddRows = false;
                         gridData.AllowUserToDeleteRows = false;
                         gridData.AllowUserToOrderColumns = true;
                         gridData.AllowUserToResizeRows = false;
+                        gridData.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
                         gridData.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
                         gridData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
                         gridData.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -258,45 +262,12 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
             {
                 foreach (DataGridViewCell cell in row.Cells)
                 {
-                    Guid guidValue;
-                    Guid guidCellValue;
-                    if (Guid.TryParse(this.searchTextBox.Text, out guidValue) && Guid.TryParse(cell.Value.ToString(), out guidCellValue) && guidValue == guidCellValue)
+                    if (cell != null && cell.Value != null && !string.IsNullOrEmpty(cell.Value.ToString()))
                     {
-                        cell.Style.BackColor = Color.Yellow;
-                    }
-                    long intValue;
-                    long intCellValue;
-                    if (long.TryParse(this.searchTextBox.Text, out intValue) && long.TryParse(cell.Value.ToString(), out intCellValue) && intValue == intCellValue)
-                    {
-                        cell.Style.BackColor = Color.Yellow;
-                    }
-                    double doubleValue;
-                    double doubleCellValue;
-                    if (double.TryParse(this.searchTextBox.Text, out doubleValue) && double.TryParse(cell.Value.ToString(), out doubleCellValue) && doubleValue == doubleCellValue)
-                    {
-                        cell.Style.BackColor = Color.Yellow;
-                    }
-                    DateTime dateTimeValue;
-                    DateTime dateTimeCellValue;
-                    if (DateTime.TryParse(this.searchTextBox.Text, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out dateTimeValue) && DateTime.TryParse(cell.Value.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out dateTimeCellValue) && dateTimeValue.Date == dateTimeCellValue.Date)
-                    {
-                        cell.Style.BackColor = Color.Yellow;
-                    }
-                    if (cell != null && cell.Value != null)
-                    {
-                        if (this.matchCaseCheckBox.Checked)
+                        if (valueContainsMatch(cell?.Value?.ToString(), this.searchTextBox.Text))
                         {
-                            if (LikeOperator.LikeString(cell.Value.ToString(), searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))
-                            {
-                                cell.Style.BackColor = Color.Yellow;
-                            }
-                        }
-                        else
-                        {
-                            if (LikeOperator.LikeString(cell.Value.ToString().ToLower(), searchTextBox.Text.ToLower(), Microsoft.VisualBasic.CompareMethod.Binary))
-                            {
-                                cell.Style.BackColor = Color.Yellow;
-                            }
+                            ((IResultsGridView)sender).HilightedCells.Add(cell);
+                            cell.Style.BackColor = Color.Yellow;
                         }
                     }
                 }
@@ -329,6 +300,7 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
         private void btnFind_Click(object sender, EventArgs e)
         {
             openInExcelToolStripMenuItem.Enabled = false;
+            this.mostRecentSearchText = searchTextBox.Text;
             if (searchLocationList.SelectedIndex == 0)
             {
                 findInRecords();
@@ -360,6 +332,51 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 });
             }
         }
+        private bool valueContainsMatch(string value, string searchText)
+        {
+            Guid guidValue;
+            Guid guidCellValue;
+            if (Guid.TryParse(searchText, out guidValue) && Guid.TryParse(value, out guidCellValue) && guidValue == guidCellValue)
+            {
+                return true;
+            }
+            long intValue;
+            long intCellValue;
+            if (long.TryParse(searchText, out intValue) && long.TryParse(value, out intCellValue) && intValue == intCellValue)
+            {
+                return true;
+            }
+            double doubleValue;
+            double doubleCellValue;
+            if (double.TryParse(searchText, out doubleValue) && double.TryParse(value, out doubleCellValue) && doubleValue == doubleCellValue)
+            {
+                return true;
+            }
+            DateTime dateTimeValue;
+            DateTime dateTimeCellValue;
+            if (DateTime.TryParse(searchText, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out dateTimeValue) && DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out dateTimeCellValue) && dateTimeValue.Date == dateTimeCellValue.Date)
+            {
+                return true;
+            }
+            if (!string.IsNullOrEmpty(value))
+            {
+                if (this.matchCaseCheckBox.Checked)
+                {
+                    if (LikeOperator.LikeString(value, searchTextBox.Text, Microsoft.VisualBasic.CompareMethod.Binary))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (LikeOperator.LikeString(value.ToLower(), searchTextBox.Text.ToLower(), Microsoft.VisualBasic.CompareMethod.Binary))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         private void updateSearchVisibility()
         {
             recordSearchGroup.Visible = (searchLocationList.SelectedIndex == 0);
@@ -376,7 +393,6 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                     //Filter the solution list
                     items = items.Where(i => !((Entity)i.Object).GetAttributeValue<bool>("ismanaged") && i.Name.ToLower() != "active" && i.Name.ToLower() != "default").ToList();
                     this.SolutionDropDownComboBox.DataSource = items;
-
                 }
                 //this.SolutionsDropDown.SolutionType = CrmActions.SolutionType.Unmanaged;
                 this.groupBox1.Text = "Solutions";
@@ -406,10 +422,9 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                 {
                     foreach (var control in tabPage.Controls)
                     {
-                        if (control is xrmtb.XrmToolBox.Controls.CRMGridView gridData)
+                        if (control is DataGridView gridData)
                         {
                             worksheetNumber++;
-                            var tempCopyMode = gridData.ClipboardCopyMode;
                             gridData.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
                             gridData.SelectAll();
                             var dataObj = gridData.GetClipboardContent();
@@ -418,32 +433,51 @@ namespace MikeFactorial.XTB.Plugins.UniversalSearch
                             {
                                 return;
                             }
-                            Clipboard.SetDataObject(dataObj);
+                            try
+                            {
+                                Clipboard.SetDataObject(dataObj);
 
-                            // Create sheet for results
-                            if (worksheetNumber == 1) 
-                            {
-                                xlResultSheet = (Worksheet)xlWorkBook.Worksheets.get_Item(1);
+                                // Create sheet for results
+                                if (worksheetNumber == 1)
+                                {
+                                    xlResultSheet = (Worksheet)xlWorkBook.Worksheets.get_Item(1);
+                                }
+                                else
+                                {
+                                    xlResultSheet = (Worksheet)xlWorkBook.Worksheets.Add(Type.Missing, (Worksheet)xlResultSheet, Type.Missing, Type.Missing);
+                                }
+                                xlResultSheet.Name = tabPage.Text;
+                                // Paste all data
+                                var cellResultA1 = (Range)xlResultSheet.Cells[1, 1];
+                                cellResultA1.Select();
+                                xlResultSheet.PasteSpecial(cellResultA1, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, false);
+
+                                // Highlight where data exists
+                                foreach (var cell in ((IResultsGridView)gridData).HilightedCells)
+                                {
+                                    xlResultSheet.Cells[cell.RowIndex + 2, cell.ColumnIndex].Interior.Color = Color.Yellow;
+                                }
+                                // Format width and headers
+                                var header = (Range)xlResultSheet.Rows[1];
+                                header.Font.Bold = true;
+                                header.Borders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+                                header.Borders[XlBordersIndex.xlEdgeBottom].Weight = XlBorderWeight.xlThick;
+                                header.AutoFilter(1, Type.Missing, XlAutoFilterOperator.xlAnd, Type.Missing, true);
+                                xlResultSheet.Activate();
+                                xlResultSheet.Application.ActiveWindow.SplitRow = 1;
+                                try { xlResultSheet.Application.ActiveWindow.FreezePanes = true; } catch { }
+                                xlResultSheet.Columns.AutoFit();
                             }
-                            else
+                            catch
                             {
-                                xlResultSheet = (Worksheet)xlWorkBook.Worksheets.Add(Type.Missing, (Worksheet)xlResultSheet, Type.Missing, Type.Missing);
+                                try
+                                {
+                                    this.LogError(e.ToString());
+                                }
+                                catch { }
+
+                                //continue
                             }
-                            xlResultSheet.Name = tabPage.Text;
-                            // Paste all data
-                            var cellResultA1 = (Range)xlResultSheet.Cells[1, 1];
-                            cellResultA1.Select();
-                            xlResultSheet.PasteSpecial(cellResultA1, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, true);
-                            // Format width and headers
-                            var header = (Range)xlResultSheet.Rows[1];
-                            header.Font.Bold = true;
-                            header.Borders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-                            header.Borders[XlBordersIndex.xlEdgeBottom].Weight = XlBorderWeight.xlThick;
-                            header.AutoFilter(1, Type.Missing, XlAutoFilterOperator.xlAnd, Type.Missing, true);
-                            xlResultSheet.Activate();
-                            xlResultSheet.Application.ActiveWindow.SplitRow = 1;
-                            try { xlResultSheet.Application.ActiveWindow.FreezePanes = true; } catch { }
-                            xlResultSheet.Columns.AutoFit();
                         }
                     }
                 }
