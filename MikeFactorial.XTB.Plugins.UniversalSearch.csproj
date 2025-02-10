@@ -223,6 +223,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ResultsDataGridView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="SolutionSearchResult.cs" />
     <Compile Include="MetadataSearchResult.cs" />
     <Compile Include="UniversalSearch.recordsearch.cs">
